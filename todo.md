@@ -1,0 +1,7 @@
+- [ ] Player behaviour on hover
+- [ ] pre-text clip timing
+- [ ] disable hover until text visible
+- [ ] Film player!
+- [ ] Responsive font size & animation speed
+- [ ] Black flash between clips
+- [x] Image fallbacks

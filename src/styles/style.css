@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "./fonts.css";
+
+@theme {
+  --color-yellow: #ffe100;
+}
+
+:root {
+  background: #212220;
+  --page-margin: 12px;
+  --char-width: 11px;
+  --line-height: 16px;
+  --font-size-sans: 10px;
+  --font-size-serif: 10px;
+  --font-sans-char-width: 0.6em;
+  --font-serif-char-width: 0.6895em;
+  --font-sans-spacing: calc(
+    1em * (var(--char-width) / var(--font-size-sans)) -
+      var(--font-sans-char-width)
+  );
+  --font-serif-spacing: calc(
+    1em * (var(--char-width) / var(--font-size-serif)) -
+      var(--font-serif-char-width)
+  );
+
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sans);
+  letter-spacing: var(--font-sans-spacing);
+  line-height: var(--line-height);
+  @variant md {
+    --page-margin: 40px;
+    --char-width: 12px;
+    --font-size-sans: 13px;
+    --font-size-serif: 12px;
+  }
+}

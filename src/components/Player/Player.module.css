@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+.videoContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background: black;
+  color: var(--color-yellow);
+}
+
+.mediaPlayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-media-player][data-view-type="video"][data-started]:not([data-controls]) {
+  cursor: none;
+}
+
+.button {
+  text-transform: uppercase;
+  cursor: pointer;
+  font: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mediaProvider {
+  display: contents;
+  video {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.playButton {
+  pointer-events: visible;
+  flex-grow: 1;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  justify-content: flex-end;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+  background-image: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.5),
+    10%,
+    transparent,
+    95%,
+    rgb(0 0 0 / 0.3)
+  );
+}
+
+.controls[data-visible] {
+  opacity: 1;
+}
+
+.controlsGroup {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 1.4rem;
+  gap: 1.4rem;
+}
+
+.slider {
+  display: inline-flex;
+  align-items: center;
+  flex-grow: 1;
+  position: relative;
+  height: 1rem;
+  contain: layout style;
+  outline: none;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  /** Prevent thumb flowing out of slider (15px = thumb width). */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.track {
+  z-index: 0;
+  position: absolute;
+  width: 100%;
+  /* height: 1em; */
+  top: 50%;
+  left: 0;
+  border-radius: 1px;
+  transform: translateY(-50%) translateZ(0);
+  /* background-color: rgb(255 255 255 / 0.3); */
+  border-bottom: 1px solid currentColor;
+  /* contain: strict; */
+}
+
+.trackFill {
+  z-index: 2; /** above track and track progress. */
+  /* background-color: var(--red); */
+  border-bottom: none;
+  height: 1rem;
+  border-right: 1px solid currentColor;
+  width: var(--slider-fill, 0%);
+  will-change: width;
+}
+
+:global(.time-slider) .trackFill {
+  width: var(--slider-fill, 0%);
+}
+
+.progress {
+  width: var(--slider-progress, 0%);
+  will-change: width;
+  background-color: rgb(255 255 255 / 0.5);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  border-radius: 2px;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  will-change: left, opacity;
+  contain: layout paint style;
+  padding-bottom: 0.7rem;
+}
+
+.preview[data-visible] {
+  opacity: 1;
+  transition: opacity 0.2s ease-in;
+}
+
+.timeValue {
+  margin-top: 2px;
+  &:before {
+    content: "[";
+  }
+  &:after {
+    content: "]";
+  }
+}
+
+.volumeValue {
+  padding: 1px 10px;
+  border-radius: 2px;
+  background-color: black;
+}
+
+.thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--slider-fill);
+  opacity: 0;
+  contain: layout size style;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #cacaca;
+  border-radius: 9999px;
+  background-color: #fff;
+  transform: translate(-50%, -50%) translateZ(0);
+  transition: opacity 0.15s ease-in;
+  pointer-events: none;
+  will-change: left;
+  z-index: 2; /** above track fill. */
+}
+
+[data-active] > .thumb {
+  opacity: 1;
+  transition: opacity 0.2s ease-in;
+}
+
+[data-dragging] > .thumb {
+  box-shadow: 0 0 0 3px hsla(0, 0%, 100%, 0.4);
+}

@@ -1,0 +1,16 @@
+# fontforge -script font-width.pe path-to-font
+
+# Open the font file passed as argument
+Open($1)
+
+# Print units per em
+Print("Units per em: " + $em)
+
+# Select the glyph named 'zero'
+Select("zero")
+
+# Get the width of the currently selected glyph
+w = GlyphInfo("Width")
+Print("Glyph 'zero' width: " + w)
+
+Quit()

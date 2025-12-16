@@ -1,0 +1,16 @@
+@font-face {
+  font-family: "Liberation Mono";
+  src: url("./fonts/LiberationMono-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Selectric";
+  src: url("./fonts/SelectricMono.otf") format("truetype");
+}
+
+:root {
+  --font-sans: "Liberation Mono", monospace;
+  --font-sans-ch: 0.6000976562em;
+  --font-serif: "Selectric", monospace;
+  --font-serif-ch: 0.6895238095em;
+}
