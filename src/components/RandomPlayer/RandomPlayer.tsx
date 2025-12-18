@@ -71,7 +71,7 @@ export function RandomPlayer({
 
   return (
     <div
-      className="fixed flex justify-center items-center pointer-events-none h-[90svh] top-[5svh] left-25 right-25"
+      className="fixed flex justify-center items-center pointer-events-none h-[90svh] lg:h-[96svh] top-[5svh] lg:top-[2svh] left-25 right-25"
       ref={containerRef}
     >
       <canvas ref={canvasRef} style={{ filter: `blur(7px)` }} />
