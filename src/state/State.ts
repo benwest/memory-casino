@@ -97,7 +97,7 @@ export class State {
     this.setTransition(new TransitionOut(this, link));
   }
 
-  private time = 100;
+  private time = 0;
   @action update(dT: number) {
     this.time += dT;
     const { hoveredLink, bodyRevealed } = this.params;
