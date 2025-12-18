@@ -83,23 +83,21 @@ const videoCanvas = document.createElement("canvas");
 videoCanvas.width = VIDEO_WIDTH;
 videoCanvas.height = VIDEO_HEIGHT;
 const videoCtx = videoCanvas.getContext("2d", { colorSpace: "display-p3" })!;
+videoCtx.beginPath();
+videoCtx.roundRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT, 9999);
+videoCtx.clip();
+videoCtx.fillStyle = "black";
+videoCtx.fillRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
 
 function renderVideo(state: State, canvas: HTMLCanvasElement) {
   const asset = getAsset(state.currentClip?.url || "");
   if (asset) {
-    videoCtx.save();
-    videoCtx.beginPath();
-    videoCtx.roundRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT, 9999);
-    videoCtx.clip();
-    videoCtx.fillStyle = "black";
-    videoCtx.fillRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
     if (asset instanceof HTMLVideoElement) {
       asset.play().catch(() => {
         console.warn("Video play failed", asset.src);
       });
     }
     videoCtx.drawImage(asset, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-    videoCtx.restore();
   }
 
   const ctx = canvas.getContext("2d", { colorSpace: "display-p3" })!;
