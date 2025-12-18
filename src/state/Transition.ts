@@ -77,8 +77,8 @@ export class TransitionOut implements Transition {
   backgroundColorKeyframes = new Keyframes<Color>(GREY).to(BLACK, 1, "quadIn");
   overlayColorKeyframes = new Keyframes<Color>(WHITE).to(BLACK, 1, "quintOut");
 
-  constructor(private state: State, link: LinkProps) {
-    this.transitionOrder = state.clipsForLink(link);
+  constructor(private state: State, link?: LinkProps) {
+    this.transitionOrder = link ? state.clipsForLink(link) : [];
   }
 
   update(time: number) {

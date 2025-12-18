@@ -9,7 +9,7 @@ import { autorun } from "mobx";
 
 const VIDEO_WIDTH = 128;
 const VIDEO_HEIGHT = 128 * 3;
-const BLUR_RADIUS = 16;
+const EXPAND = 16;
 
 export interface RandomPlayerProps {
   state: State;
@@ -30,8 +30,8 @@ export function RandomPlayer({
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
-    canvas.width = VIDEO_WIDTH + BLUR_RADIUS * 2;
-    canvas.height = VIDEO_HEIGHT + BLUR_RADIUS * 2;
+    canvas.width = VIDEO_WIDTH + EXPAND * 2;
+    canvas.height = VIDEO_HEIGHT + EXPAND * 2;
 
     const resizeObserver = new ResizeObserver(() => {
       const scale = Math.min(
@@ -71,10 +71,10 @@ export function RandomPlayer({
 
   return (
     <div
-      className="fixed flex justify-center items-center pointer-events-none top-5 bottom-5 left-25 right-25"
+      className="fixed flex justify-center items-center pointer-events-none h-[90svh] top-[5svh] left-25 right-25"
       ref={containerRef}
     >
-      <canvas ref={canvasRef} />
+      <canvas ref={canvasRef} style={{ filter: `blur(7px)` }} />
     </div>
   );
 }
@@ -103,11 +103,7 @@ function renderVideo(state: State, canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d", { colorSpace: "display-p3" })!;
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const brightness = remap(state.overlayColor[3], 1, 0, 2, 1);
-  ctx.filter = `blur(${
-    BLUR_RADIUS / 3
-  }px) contrast(1.25) brightness(${brightness})`;
-  ctx.drawImage(videoCtx.canvas, BLUR_RADIUS, BLUR_RADIUS);
+  ctx.drawImage(videoCtx.canvas, EXPAND, EXPAND);
   ctx.globalCompositeOperation = "source-atop";
   ctx.fillStyle = toRgbaString(state.overlayColor);
   ctx.fillRect(0, 0, canvas.width, canvas.height);

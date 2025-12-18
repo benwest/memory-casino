@@ -17,8 +17,8 @@ const bigSpaces = {
 
 const smallSpaces = {
   "[:]": " ".repeat(2),
-  "[;]": " ".repeat(5),
-  "[.]": " ".repeat(7),
+  "[;]": " ".repeat(4),
+  "[.]": " ".repeat(5),
 };
 
 export const DURATIONS = {

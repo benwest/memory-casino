@@ -7,6 +7,8 @@ import { Rect } from "@/utils/Rect";
 import { useSize } from "@/hooks/useSize";
 import { LinkProps } from "@/state/Char";
 
+const isTouch = "ontouchstart" in window;
+
 export type StateRef = React.RefObject<State | null>;
 
 export function useUpdateState(
@@ -39,7 +41,7 @@ export function useUpdateState(
         state.transitionInFast();
       }
     } else {
-      state.transitionOut(currentFilm);
+      state.transitionOut(isTouch ? undefined : currentFilm);
     }
   }, [state, currentFilm]);
 
@@ -47,17 +49,19 @@ export function useUpdateState(
     state.update(dT);
   });
 
+  const revealBodyOnScroll = windowSize[0] <= 600;
   useLayoutEffect(() => {
-    if (windowSize[0] > 600) return;
+    if (!revealBodyOnScroll) return;
     const onScroll = () => {
       state.setParams({ bodyRevealed: window.scrollY > 0 });
     };
     window.addEventListener("scroll", onScroll);
+    onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
       state.setParams({ bodyRevealed: true });
     };
-  }, [state, windowSize]);
+  }, [state, revealBodyOnScroll]);
 
   useLayoutEffect(() => {
     state.setParams({

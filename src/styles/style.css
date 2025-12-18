@@ -9,8 +9,8 @@
 :root {
   background: #212220;
   --page-margin: 12px;
-  --char-width: 11px;
-  --line-height: 16px;
+  --char-width: 9px;
+  --line-height: 12px;
   --font-size-sans: 10px;
   --font-size-serif: 10px;
   --font-sans-char-width: 0.6em;

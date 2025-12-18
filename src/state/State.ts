@@ -92,7 +92,7 @@ export class State {
     this.setTransition(new TransitionInFast(this));
   }
 
-  transitionOut(link: LinkProps) {
+  transitionOut(link?: LinkProps) {
     if (this.transition instanceof TransitionOut) return;
     this.setTransition(new TransitionOut(this, link));
   }
