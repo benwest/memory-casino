@@ -28,7 +28,7 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_PREVIEW }}
           ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "www/"
+          SOURCE: "dist/"
           REMOTE_HOST: opal11.opalstack.com
           REMOTE_USER: benwest
           TARGET: apps/memory-casino
