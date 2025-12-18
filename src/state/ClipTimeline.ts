@@ -6,16 +6,24 @@ interface ClipTimelineParams {
 }
 
 export class ClipTimeline {
-  initialDelay: number;
-  initialClips: number;
-  initialClipDuration: number;
-  loopDurations: number[];
+  readonly initialDelay: number;
+  readonly initialClips: number;
+  readonly initialClipDuration: number;
+  readonly loopDelays: readonly number[];
+  readonly loopDurations: readonly number[];
+  readonly totalLoopDuration: number;
 
   constructor(params: ClipTimelineParams) {
     this.initialDelay = params.initialDelay;
     this.initialClips = params.initialClips;
     this.initialClipDuration = params.initialClipDuration;
+    const loopDelays = [0];
+    for (const duration of params.loopDurations) {
+      loopDelays.push(loopDelays.at(-1)! + duration);
+    }
+    this.loopDelays = loopDelays;
     this.loopDurations = params.loopDurations;
+    this.totalLoopDuration = this.loopDurations.reduce((sum, d) => sum + d, 0);
   }
 
   private getDuration(index: number): number {
@@ -36,16 +44,13 @@ export class ClipTimeline {
     const loopsCompleted = Math.floor(
       (index - this.initialClips) / this.loopDurations.length
     );
-    const loopTotalDuration = this.loopDurations.reduce((sum, d) => sum + d, 0);
     const indexInLoop = (index - this.initialClips) % this.loopDurations.length;
-    const partialLoopDuration = this.loopDurations
-      .slice(0, indexInLoop)
-      .reduce((sum, d) => sum + d, 0);
+    const partialLoopDuration = this.loopDelays[indexInLoop];
 
     return (
       this.initialDelay +
       initialDuration +
-      loopsCompleted * loopTotalDuration +
+      loopsCompleted * this.totalLoopDuration +
       partialLoopDuration
     );
   }
@@ -61,15 +66,13 @@ export class ClipTimeline {
     const timeInLoops = time - (this.initialDelay + initialClipsDuration);
     const loopTotalDuration = this.loopDurations.reduce((sum, d) => sum + d, 0);
     const loopsCompleted = Math.floor(timeInLoops / loopTotalDuration);
-    let timeInCurrentLoop = timeInLoops % loopTotalDuration;
-    for (let i = 0; i < this.loopDurations.length; i++) {
-      const clipDuration = this.loopDurations[i];
-      if (timeInCurrentLoop < clipDuration) {
+    const timeInCurrentLoop = timeInLoops % loopTotalDuration;
+    for (let i = this.loopDelays.length - 1; i >= 0; i--) {
+      if (timeInCurrentLoop >= this.loopDelays[i]) {
         return (
           this.initialClips + loopsCompleted * this.loopDurations.length + i
         );
       }
-      timeInCurrentLoop -= clipDuration;
     }
 
     throw new Error("Unreachable");

@@ -2,7 +2,7 @@ import { Rect } from "@/utils/Rect";
 import { Char, LinkProps, CharType } from "./Char";
 import { content } from "@/content";
 
-export interface LayoutParams {
+export interface TextLayoutParams {
   charWidthPx: number;
   lineHeightPx: number;
   maxWidthPx: number;
@@ -42,25 +42,23 @@ interface LayoutContext {
 }
 
 export class TextLayout {
-  lines: Char[][] = [[]];
-  charWidthPx: number;
-  lineHeightPx: number;
-  widthChars: number;
-  heightChars: number;
-  columnWidthChars: number;
-  gutterWidthChars: number;
-  breakpoint: "small" | "medium" | "large";
-  duration: number;
+  readonly lines: Char[][] = [[]];
+  readonly chars: Char[] = [];
+  readonly charWidthPx: number;
+  readonly lineHeightPx: number;
+  readonly widthChars: number;
+  readonly heightChars: number;
+  readonly columnWidthChars: number;
+  readonly gutterWidthChars: number;
+  readonly breakpoint: "small" | "medium" | "large";
+  readonly duration: number;
   get widthPx() {
     return this.charWidthPx * this.widthChars;
   }
   get heightPx() {
     return this.lineHeightPx * this.heightChars;
   }
-  get chars() {
-    return this.lines.flat();
-  }
-  linkRects: Map<LinkProps, Rect>;
+  readonly linkRects: Map<LinkProps, Rect>;
 
   private delay = 0;
   private stack: LayoutContext[] = [
@@ -74,7 +72,7 @@ export class TextLayout {
     return this.stack.at(-1)!;
   }
 
-  constructor(public params: LayoutParams) {
+  constructor(public params: TextLayoutParams) {
     this.charWidthPx = params.charWidthPx;
     this.lineHeightPx = params.lineHeightPx;
 
@@ -162,12 +160,6 @@ export class TextLayout {
     this.heightChars = this.lines.length;
     this.duration = this.delay;
 
-    const transitionOutOrder = shuffle(this.chars);
-    for (let i = 0; i < transitionOutOrder.length; i++) {
-      const char = transitionOutOrder[i];
-      char.transitionOutDelay = i * 0.0001;
-    }
-
     this.linkRects = this.getLinkRects();
   }
 
@@ -251,6 +243,7 @@ export class TextLayout {
       link: this.ctx.link,
     });
     this.currentLine.push(char);
+    this.chars.push(char);
 
     this.wait(this.ctx.duration);
   }

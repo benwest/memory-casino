@@ -4,6 +4,7 @@ import { State } from "../../state/State";
 import { useTick } from "../../hooks/useTick";
 import { getAsset, preloadAssets } from "./assetCache";
 import { remap } from "@/utils/math";
+import { Rect } from "@/utils/Rect";
 
 const VIDEO_WIDTH = 128;
 const VIDEO_HEIGHT = 128 * 3;
@@ -37,6 +38,9 @@ export function RandomPlayer({
         container.clientHeight / canvas.height
       );
       canvas.style.transform = `scale(${scale})`;
+      state.setParams({
+        playerRect: Rect.fromElement(canvas),
+      });
     });
     resizeObserver.observe(container);
 
@@ -79,21 +83,21 @@ const videoCtx = videoCanvas.getContext("2d", { colorSpace: "display-p3" })!;
 
 function renderVideo(state: State, canvas: HTMLCanvasElement) {
   const asset = getAsset(state.currentClip?.url || "");
-  videoCtx.save();
-  videoCtx.beginPath();
-  videoCtx.roundRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT, 9999);
-  videoCtx.clip();
-  videoCtx.fillStyle = "black";
-  videoCtx.fillRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
   if (asset) {
+    videoCtx.save();
+    videoCtx.beginPath();
+    videoCtx.roundRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT, 9999);
+    videoCtx.clip();
+    videoCtx.fillStyle = "black";
+    videoCtx.fillRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
     if (asset instanceof HTMLVideoElement) {
       asset.play().catch(() => {
         console.warn("Video play failed", asset.src);
       });
     }
     videoCtx.drawImage(asset, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+    videoCtx.restore();
   }
-  videoCtx.restore();
 
   const ctx = canvas.getContext("2d", { colorSpace: "display-p3" })!;
   ctx.save();

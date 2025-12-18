@@ -11,12 +11,14 @@
     "convert-sources": "bun run ./scripts/convert-sources.ts"
   },
   "dependencies": {
-    "@preact/signals-core": "^1.12.1",
+    "@babel/plugin-proposal-decorators": "^7.28.0",
     "@tailwindcss/vite": "^4.1.17",
     "@vidstack/react": "^1.12.13",
     "@webav/mp4box.js": "^0.5.7",
     "eases": "^1.0.8",
     "hls.js": "^1.6.15",
+    "mobx": "^6.15.0",
+    "mobx-react-lite": "^4.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0",

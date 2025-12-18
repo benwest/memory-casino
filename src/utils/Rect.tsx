@@ -70,4 +70,8 @@ export class Rect {
   static fromDOMRect(rect: DOMRect) {
     return new Rect(rect.x, rect.y, rect.width, rect.height);
   }
+
+  static fromElement(el: HTMLElement) {
+    return Rect.fromDOMRect(el.getBoundingClientRect());
+  }
 }

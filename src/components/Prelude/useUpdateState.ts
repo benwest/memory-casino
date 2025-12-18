@@ -22,11 +22,10 @@ export function useUpdateState(
   const canvasSize = useSize(canvasRef);
 
   useLayoutEffect(() => {
-    state.layout({
+    state.setParams({
       charWidthPx: charWidth,
       lineHeightPx: lineHeight,
       maxWidthPx: windowSize[0] - margin * 2,
-      gutterWidthPx: canvasSize.width,
     });
   }, [charWidth, lineHeight, margin, state, windowSize, canvasSize]);
 
@@ -51,38 +50,36 @@ export function useUpdateState(
   useLayoutEffect(() => {
     if (windowSize[0] > 600) return;
     const onScroll = () => {
-      state.bodyRevealed = window.scrollY > 0;
+      state.setParams({ bodyRevealed: window.scrollY > 0 });
     };
     window.addEventListener("scroll", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      state.bodyRevealed = true;
+      state.setParams({ bodyRevealed: true });
     };
   }, [state, windowSize]);
 
   useLayoutEffect(() => {
-    const updateObscuredChars = () => {
-      const canvas = canvasRef.current;
+    state.setParams({
+      viewportRect: new Rect(0, 0, windowSize[0], windowSize[1]),
+    });
+  }, [state, windowSize]);
+
+  useLayoutEffect(() => {
+    const update = () => {
       const textDiv = textRef.current;
-      if (!canvas || !textDiv) return;
-      state.viewportRect = new Rect(
-        0,
-        0,
-        window.innerWidth,
-        window.innerHeight
-      );
-      state.playerRect = Rect.fromDOMRect(canvas.getBoundingClientRect());
-      state.textRect = Rect.fromDOMRect(textDiv.getBoundingClientRect());
+      if (!textDiv) return;
+      state.setParams({
+        textRect: Rect.fromElement(textDiv),
+      });
     };
-    const resizeObserver = new ResizeObserver(updateObscuredChars);
-    resizeObserver.observe(document.body);
+    const resizeObserver = new ResizeObserver(update);
     resizeObserver.observe(textRef.current!);
-    resizeObserver.observe(canvasRef.current!);
-    window.addEventListener("scroll", updateObscuredChars);
-    updateObscuredChars();
+    window.addEventListener("scroll", update);
+    update();
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("scroll", updateObscuredChars);
+      window.removeEventListener("scroll", update);
     };
   }, [canvasRef, state, textRef]);
 

@@ -1,5 +1,6 @@
 import { lerpSmooth, moveTowards } from "@/utils/math";
 import { Rect } from "@/utils/Rect";
+import { observable, action } from "mobx";
 
 const CHAR_FADE_IN_DURATION = 1 / 20;
 const CHAR_FADE_OUT_DURATION = 1 / 500;
@@ -24,16 +25,16 @@ export interface CharParams {
 }
 
 export class Char {
-  index: number;
-  value: string;
-  type: CharType;
-  link?: LinkProps;
-  rect: Rect;
-  transitionInDelay: number;
-  transitionOutDelay = 0;
+  readonly index: number;
+  readonly value: string;
+  readonly type: CharType;
+  readonly link?: LinkProps;
+  readonly rect: Rect;
+  readonly transitionInDelay: number;
 
   lit = false;
-  lightBrightness = 0;
+  @observable accessor lightBrightness = 0;
+  @observable accessor opacity = 0;
 
   opacityProps = {
     transitionIn: false,
@@ -42,8 +43,6 @@ export class Char {
     hover: false,
     bodyReveal: true,
   };
-
-  opacity = 0;
 
   get targetOpacity() {
     const { transitionIn, transitionOut, light, hover, bodyReveal } =
@@ -68,7 +67,7 @@ export class Char {
     this.transitionInDelay = delay;
   }
 
-  update(dT: number) {
+  @action update(dT: number) {
     if (this.targetOpacity === 0) {
       this.opacity = Math.min(this.opacity, 0.5);
       this.opacity = moveTowards(

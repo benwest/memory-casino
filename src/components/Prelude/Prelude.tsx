@@ -1,13 +1,14 @@
 import { toRgbaString } from "@/utils/Color";
 import { Dots } from "../Dots";
 import { RandomPlayer } from "../RandomPlayer";
-import { TextContainer, TextRenderer, useUpdateState } from "../Text";
+import { TextContainer, TextRenderer } from "../Text";
 import { Links } from "../Links";
 import { State } from "@/state/State";
 import { useTick } from "@/hooks/useTick";
 import { twMerge } from "tailwind-merge";
 import { useRef } from "react";
 import { LinkProps } from "@/state/Char";
+import { useUpdateState } from "./useUpdateState";
 
 export interface PreludeProps {
   running: boolean;

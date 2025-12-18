@@ -4,34 +4,35 @@ import { State } from "./State";
 import { BLACK, GREY, TRANSPARENT_WHITE, WHITE } from "./colors";
 import { SourceData } from "./sources";
 import { LinkProps } from "./Char";
-import { remap, remapClamped } from "@/utils/math";
+import { remapClamped } from "@/utils/math";
+import { computed } from "mobx";
 
 export interface Transition {
   update(time: number): void;
-  refresh(): Transition;
 }
+
 export class TransitionIn implements Transition {
-  private textStartDelay: number;
-  private backgroundColorKeyframes: Keyframes<Color>;
-  private overlayColorKeyframes: Keyframes<Color>;
-
-  constructor(private state: State) {
-    this.textStartDelay =
-      state.clipTimeline.initialDelay +
-      state.clipTimeline.initialClips * state.clipTimeline.initialClipDuration;
-
-    const clipStartDelay = state.clipTimeline.initialDelay;
-
-    this.backgroundColorKeyframes = new Keyframes<Color>(BLACK).to(
+  @computed get textStartDelay() {
+    return (
+      this.state.clipTimeline.initialDelay +
+      this.state.clipTimeline.initialClips *
+        this.state.clipTimeline.initialClipDuration
+    );
+  }
+  @computed get backgroundColorKeyframes() {
+    return new Keyframes<Color>(BLACK).to(
       GREY,
-      clipStartDelay,
+      this.state.clipTimeline.initialDelay,
       "quadOut"
     );
-
-    this.overlayColorKeyframes = new Keyframes<Color>(BLACK)
-      .to(WHITE, clipStartDelay, "quadIn")
+  }
+  @computed get overlayColorKeyframes() {
+    return new Keyframes<Color>(BLACK)
+      .to(WHITE, this.state.clipTimeline.initialDelay, "quadIn")
       .to(TRANSPARENT_WHITE, 0);
   }
+
+  constructor(private state: State) {}
 
   update(time: number) {
     const state = this.state;
@@ -46,69 +47,38 @@ export class TransitionIn implements Transition {
 
     state.illuminateCurrentClips();
   }
-
-  refresh() {
-    return new TransitionIn(this.state);
-  }
 }
 
 export class TransitionInFast implements Transition {
-  private backgroundColorKeyframes: Keyframes<Color>;
-  private overlayColorKeyframes: Keyframes<Color>;
-  private charDelays: number[];
+  backgroundColorKeyframes = new Keyframes<Color>(BLACK).to(GREY, 2, "quadOut");
+  overlayColorKeyframes = new Keyframes<Color>(WHITE).to(
+    TRANSPARENT_WHITE,
+    2,
+    "quadIn"
+  );
 
-  constructor(private state: State) {
-    this.backgroundColorKeyframes = new Keyframes<Color>(BLACK).to(
-      GREY,
-      2,
-      "quadOut"
-    );
-    this.overlayColorKeyframes = new Keyframes<Color>(WHITE).to(
-      TRANSPARENT_WHITE,
-      2,
-      "quadIn"
-    );
-
-    const charDelayVariance = 0.0;
-    this.charDelays = this.state.textLayout.chars.map(
-      (char, i) => i * 0.0002 + Math.random() * charDelayVariance
-    );
-  }
+  constructor(private state: State) {}
 
   update(time: number) {
     const state = this.state;
     state.linksEnabled = true;
     for (const char of state.textLayout.chars) {
-      char.opacityProps.transitionIn = time >= this.charDelays[char.index];
+      char.opacityProps.transitionIn = time >= char.index * 0.0002;
       char.opacityProps.transitionOut = false;
     }
     state.backgroundColor = this.backgroundColorKeyframes.sample(time);
     state.overlayColor = this.overlayColorKeyframes.sample(time);
     state.illuminateCurrentClips();
   }
-
-  refresh() {
-    return new TransitionInFast(this.state);
-  }
 }
 
 export class TransitionOut implements Transition {
   transitionOrder: SourceData[];
-  backgroundColorKeyframes: Keyframes<Color>;
-  overlayColorKeyframes: Keyframes<Color>;
+  backgroundColorKeyframes = new Keyframes<Color>(GREY).to(BLACK, 1, "quadIn");
+  overlayColorKeyframes = new Keyframes<Color>(WHITE).to(BLACK, 1, "quintOut");
 
-  constructor(private state: State, private link: LinkProps) {
-    this.transitionOrder = shuffle(state.clipsForLink(link));
-    this.backgroundColorKeyframes = new Keyframes<Color>(GREY).to(
-      BLACK,
-      5,
-      "quadIn"
-    );
-    this.overlayColorKeyframes = new Keyframes<Color>(WHITE).to(
-      GREY,
-      1,
-      "quintOut"
-    );
+  constructor(private state: State, link: LinkProps) {
+    this.transitionOrder = state.clipsForLink(link);
   }
 
   update(time: number) {
@@ -126,10 +96,6 @@ export class TransitionOut implements Transition {
     }
     this.state.backgroundColor = this.backgroundColorKeyframes.sample(time);
     this.state.overlayColor = this.overlayColorKeyframes.sample(time);
-  }
-
-  refresh() {
-    return new TransitionOut(this.state, this.link);
   }
 }
 

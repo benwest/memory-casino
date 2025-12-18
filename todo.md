@@ -1,7 +1,7 @@
 - [x] Player behaviour on hover
 - [x] pre-text clip timing
-- [ ] disable hover until text visible
+- [x] disable hover until text visible
 - [ ] Film player!
-- [ ] Responsive font size & animation speed
-- [ ] Black flash between clips
+- [x] Responsive font size & animation speed
+- [x?] Black flash between clips
 - [x] Image fallbacks

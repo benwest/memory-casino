@@ -1,3 +1,12 @@
+let cachedStyle: CSSStyleDeclaration | null = null;
+
 export function getCssVar(varName: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(varName);
+  if (!cachedStyle) {
+    cachedStyle = getComputedStyle(document.documentElement);
+  }
+  return cachedStyle.getPropertyValue(varName);
 }
+
+window.addEventListener("resize", () => {
+  cachedStyle = null;
+});

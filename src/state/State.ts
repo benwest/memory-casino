@@ -1,9 +1,8 @@
 import { RNG } from "@/utils/RNG";
 import { SourceData, sources } from "./sources";
-import { DURATIONS, LayoutParams, PAUSES, TextLayout } from "./TextLayout";
+import { DURATIONS, TextLayoutParams, PAUSES, TextLayout } from "./TextLayout";
 import { Char, LinkProps } from "./Char";
 import { Rect } from "../utils/Rect";
-import { Signal } from "@preact/signals-core";
 import { ClipTimeline } from "./ClipTimeline";
 import {
   Transition,
@@ -13,44 +12,46 @@ import {
 } from "./Transition";
 import { BLACK } from "./colors";
 import { content } from "@/content";
+import { action, computed, observable, configure } from "mobx";
 
-interface StateParams {
-  sources: SourceData[];
-  layout: LayoutParams;
+configure({ computedRequiresReaction: true });
+
+interface Params {
+  charWidthPx: number;
+  lineHeightPx: number;
+  maxWidthPx: number;
+  viewportRect: Rect;
+  playerRect: Rect;
+  textRect: Rect;
+  hoveredLink: LinkProps | null;
+  bodyRevealed: boolean;
 }
 
 export class State {
-  readonly sources: SourceData[];
-  viewportRect = new Rect();
-  playerRect = new Rect();
-  textRect = new Rect();
+  readonly sources: SourceData[] = sources;
 
-  textLayout!: TextLayout;
-  clipTimeline!: ClipTimeline;
-  transition!: Transition;
-  transitionStartTime = 0;
+  @observable.deep accessor params: Params = {
+    charWidthPx: 12,
+    lineHeightPx: 18,
+    maxWidthPx: 600,
+    viewportRect: new Rect(),
+    playerRect: new Rect(),
+    textRect: new Rect(),
+    hoveredLink: null,
+    bodyRevealed: true,
+  };
 
-  onLayoutUpdated = new Signal();
-  private readonly seed = Math.random() * 1_000_000;
-
-  backgroundColor = BLACK;
-  overlayColor = BLACK;
-  currentClip: SourceData | null = null;
-  preloadClips: SourceData[] = [];
-
-  constructor(params: StateParams) {
-    this.sources = params.sources;
-    this.layout(params.layout);
+  @computed get textLayout() {
+    return new TextLayout({
+      charWidthPx: this.params.charWidthPx,
+      lineHeightPx: this.params.lineHeightPx,
+      maxWidthPx: this.params.maxWidthPx,
+      gutterWidthPx: this.params.playerRect.width,
+    });
   }
 
-  bodyRevealed = true;
-  hoveredLink: LinkProps | null = null;
-  linksEnabled = false;
-
-  layout(params: LayoutParams) {
-    this.textLayout = new TextLayout(params);
-
-    this.clipTimeline = new ClipTimeline({
+  @computed get clipTimeline() {
+    return new ClipTimeline({
       initialDelay: 10,
       initialClips: 16,
       initialClipDuration:
@@ -59,41 +60,53 @@ export class State {
         this.textLayout.lineDuration(i)
       ),
     });
+  }
 
-    if (!this.transition) {
-      this.transition = new TransitionIn(this);
-    } else {
-      this.transition = this.transition.refresh();
-    }
+  private transition: Transition = new TransitionIn(this);
+  private transitionStartTime = 0;
+
+  private readonly seed = Math.random() * 1_000_000;
+
+  @observable accessor backgroundColor = BLACK;
+  @observable accessor overlayColor = BLACK;
+  @observable accessor currentClip: SourceData | null = null;
+  @observable accessor preloadClips: SourceData[] = [];
+  @observable accessor linksEnabled = false;
+
+  @action setParams(params: Partial<Params>) {
+    Object.assign(this.params, params);
+  }
+
+  private setTransition(transition: Transition) {
+    this.transition = transition;
+    this.transitionStartTime = this.time;
   }
 
   transitionIn() {
     if (this.transition instanceof TransitionIn) return;
-    this.transition = new TransitionIn(this);
-    this.transitionStartTime = this.time;
+    this.setTransition(new TransitionIn(this));
   }
 
   transitionInFast() {
     if (this.transition instanceof TransitionInFast) return;
-    this.transition = new TransitionInFast(this);
-    this.transitionStartTime = this.time;
+    this.setTransition(new TransitionInFast(this));
   }
 
   transitionOut(link: LinkProps) {
     if (this.transition instanceof TransitionOut) return;
-    this.transition = new TransitionOut(this, link);
-    this.transitionStartTime = this.time;
+    this.setTransition(new TransitionOut(this, link));
   }
 
-  time = 0;
-  update(dT: number) {
+  private time = 100;
+  @action update(dT: number) {
     this.time += dT;
+    const { hoveredLink, bodyRevealed } = this.params;
 
     const nextClips = this.clipTimeline.sample(this.time, this.time + 5);
 
     this.preloadClips = nextClips
       .map(({ index, duration }) =>
-        this.selectSource(index, duration, this.hoveredLink?.sourceFilter)
+        this.selectSource(index, duration, hoveredLink?.sourceFilter)
       )
       .filter((s): s is SourceData => s !== undefined);
 
@@ -103,8 +116,8 @@ export class State {
       if (thumbnail) this.preloadClips.push(thumbnail);
     }
 
-    if (this.hoveredLink) {
-      const thumbnail = this.getLinkThumbnailSource(this.hoveredLink);
+    if (hoveredLink) {
+      const thumbnail = this.getLinkThumbnailSource(hoveredLink);
       if (thumbnail) {
         this.currentClip = thumbnail;
       }
@@ -113,59 +126,30 @@ export class State {
         nextClips[0]?.startTime <= this.time ? this.preloadClips[0] : null;
     }
 
-    // this.updateLights();
     this.transition.update(this.time - this.transitionStartTime);
-
-    // if (this.animation?.type === "transition-in") {
-    //   const animationTime = this.time - this.animation.startTime;
-    //   for (const char of this.textLayout.chars) {
-    //     char.opacityProps.transitionIn =
-    //       animationTime - this.textStartDelay >= char.transitionInDelay;
-    //     char.opacityProps.transitionOut = false;
-    //   }
-    //   this.backgroundColor = BACKGROUND_COLOR_KEYFRAMES.sample(animationTime);
-    //   this.overlayColor = OVERLAY_COLOR_KEYFRAMES.sample(animationTime);
-    // } else if (this.animation?.type === "transition-in-fast") {
-    //   const animationTime = this.time - this.animation.startTime;
-    //   for (const char of chars) {
-    //     char.opacityProps.transitionIn = true;
-    //     char.opacityProps.transitionOut =
-    //       animationTime <= char.transitionOutDelay;
-    //   }
-    // } else if (this.animation?.type === "transition-out") {
-    //   const animationTime = this.time - this.animation.startTime;
-    //   for (const char of chars) {
-    //     char.opacityProps.transitionIn = true;
-    //     char.opacityProps.transitionOut =
-    //       animationTime >= char.transitionOutDelay;
-    //   }
-    // } else {
-    //   for (const char of chars) {
-    //     char.opacityProps.transitionIn = true;
-    //     char.opacityProps.transitionOut = false;
-    //   }
-    // }
 
     for (const char of this.textLayout.chars) {
       char.opacityProps.hover =
         char.value === " " ||
-        !this.hoveredLink ||
-        char.link === this.hoveredLink;
+        !hoveredLink ||
+        char.link?.url === hoveredLink.url;
 
       char.opacityProps.bodyReveal =
-        this.bodyRevealed || char.type !== "body" || char.value === " ";
+        bodyRevealed || char.type !== "body" || char.value === " ";
 
       char.update(dT);
     }
   }
 
-  getVisibleChars() {
-    const ox = -this.textRect.x;
-    const oy = -this.textRect.y;
-    const textRelativePlayer = this.playerRect.clone().translate(ox, oy);
-    const textRelativeViewport = this.viewportRect.clone().translate(ox, oy);
+  @computed get visibleSpaces() {
+    const { viewportRect, playerRect, textRect } = this.params;
+    const ox = -textRect.x;
+    const oy = -textRect.y;
+    const textRelativePlayer = playerRect.clone().translate(ox, oy);
+    const textRelativeViewport = viewportRect.clone().translate(ox, oy);
     return this.textLayout.chars.filter(
       char =>
+        char.value === " " &&
         textRelativeViewport.intersects(char.rect) &&
         !textRelativePlayer.intersects(char.rect)
     );
@@ -178,15 +162,11 @@ export class State {
   }
 
   illuminateClips(clips: SourceData[]) {
-    const visibleSpaces = this.getVisibleChars().filter(
-      char => char.value === " "
-    );
-
     const litSpaces = new Set<Char>();
-    if (visibleSpaces.length) {
+    if (this.visibleSpaces.length) {
       for (const clip of clips) {
         const hash = RNG.hash(clip.url);
-        litSpaces.add(RNG.sample(hash, visibleSpaces));
+        litSpaces.add(RNG.sample(hash, this.visibleSpaces));
       }
     }
 
@@ -198,8 +178,8 @@ export class State {
   illuminateCurrentClips() {
     const currentClips: SourceData[] = [];
 
-    if (this.hoveredLink) {
-      currentClips.push(...this.clipsForLink(this.hoveredLink));
+    if (this.params.hoveredLink) {
+      currentClips.push(...this.clipsForLink(this.params.hoveredLink));
     } else if (this.currentClip) {
       currentClips.push(this.currentClip);
     }
@@ -220,13 +200,5 @@ export class State {
     return RNG.sample(this.seed + seed, candidates);
   }
 
-  static instance = new State({
-    sources,
-    layout: {
-      charWidthPx: 12,
-      lineHeightPx: 18,
-      maxWidthPx: 600,
-      gutterWidthPx: 40,
-    },
-  });
+  static instance = new State();
 }
