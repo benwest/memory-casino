@@ -30,7 +30,7 @@ interface Params {
 export class State {
   readonly sources: SourceData[] = sources;
 
-  @observable.deep accessor params: Params = {
+  @observable accessor params: Params = {
     charWidthPx: 12,
     lineHeightPx: 18,
     maxWidthPx: 600,
@@ -67,10 +67,10 @@ export class State {
 
   private readonly seed = Math.random() * 1_000_000;
 
-  @observable accessor backgroundColor = BLACK;
-  @observable accessor overlayColor = BLACK;
-  @observable accessor currentClip: SourceData | null = null;
-  @observable accessor preloadClips: SourceData[] = [];
+  @observable.ref accessor backgroundColor = BLACK;
+  @observable.ref accessor overlayColor = BLACK;
+  @observable.struct accessor currentClip: SourceData | null = null;
+  @observable.struct accessor preloadClips: SourceData[] = [];
   @observable accessor linksEnabled = false;
 
   @action setParams(params: Partial<Params>) {

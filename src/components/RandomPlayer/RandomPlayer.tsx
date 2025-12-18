@@ -5,6 +5,7 @@ import { useTick } from "../../hooks/useTick";
 import { getAsset, preloadAssets } from "./assetCache";
 import { remap } from "@/utils/math";
 import { Rect } from "@/utils/Rect";
+import { autorun } from "mobx";
 
 const VIDEO_WIDTH = 128;
 const VIDEO_HEIGHT = 128 * 3;
@@ -47,23 +48,25 @@ export function RandomPlayer({
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [state]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const dispose = autorun(() => preloadAssets(state.preloadClips));
+    return () => {
+      preloadAssets([]);
+      dispose();
+    };
+  }, [enabled, state]);
 
   useTick(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (enabled) {
-      preloadAssets(state.preloadClips);
-    } else {
-      preloadAssets([]);
-    }
     renderVideo(state, canvas);
   });
 
   useEffect(() => {
-    return () => {
-      preloadAssets([]);
-    };
+    return () => {};
   }, []);
 
   return (

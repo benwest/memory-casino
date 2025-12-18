@@ -17,23 +17,11 @@ const lightRadius = 20;
 export function TextRenderer({ state }: TextRendererProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const fontSans = `${useCssVar("--font-size-sans")} "Liberation Mono"`;
-  const fontSerif = `${useCssVar("--font-size-serif")} "Selectric"`;
-  const styles = useMemo(
-    () => ({
-      body: { font: fontSerif, color: toRgbaString(YELLOW) },
-      title: { font: fontSans, color: toRgbaString(YELLOW) },
-      link: { font: fontSans, color: "white" },
-      "inactive-link": { font: fontSans, color: toRgbaString(YELLOW) },
-    }),
-    [fontSans, fontSerif]
-  );
-
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
     return autorun(() => renderText(ctx, state));
-  }, [state, styles]);
+  }, [state]);
 
   return <canvas ref={canvasRef} />;
 }
