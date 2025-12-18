@@ -8,12 +8,13 @@ export const content = {
       link: {
         url: "https://player.vimeo.com/external/923559760.m3u8?s=fd02e1d140d68c1c00077ae6b3331fbb10369b1a&logging=false",
         sourceFilter: "MC1",
+        thumbnail: "MC1_00000",
       },
     },
     {
       longTitle: "MEMORY CASINO  PART TWO",
       shortTitle: "PART TWO",
-      subtitle: "COMING SOON",
+      subtitle: "TO COME",
       link: undefined,
     },
   ],

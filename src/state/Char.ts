@@ -11,29 +11,33 @@ export type CharType = "title" | "link" | "inactive-link" | "body" | "gap";
 export interface LinkProps {
   url: string;
   sourceFilter: string;
+  thumbnail: string;
 }
 
 export interface CharParams {
-  value?: string;
-  type?: CharType;
+  index: number;
+  value: string;
+  type: CharType;
   link?: LinkProps;
   rect?: Rect;
-  delay?: number;
+  transitionInDelay?: number;
 }
 
 export class Char {
+  index: number;
   value: string;
   type: CharType;
   link?: LinkProps;
   rect: Rect;
-  delay: number;
+  transitionInDelay: number;
+  transitionOutDelay = 0;
 
   lit = false;
   lightBrightness = 0;
-  obscured = false;
 
   opacityProps = {
     transitionIn: false,
+    transitionOut: false,
     light: false,
     hover: false,
     bodyReveal: true,
@@ -42,22 +46,26 @@ export class Char {
   opacity = 0;
 
   get targetOpacity() {
-    const { transitionIn, light, hover, bodyReveal } = this.opacityProps;
+    const { transitionIn, transitionOut, light, hover, bodyReveal } =
+      this.opacityProps;
+    if (transitionOut) return 0;
     return light || (transitionIn && hover && bodyReveal) ? 1 : 0;
   }
 
   constructor({
+    index,
     value = " ",
     type = "body",
     link,
     rect = new Rect(0, 0, 0, 0),
-    delay = 0,
+    transitionInDelay: delay = 0,
   }: CharParams) {
+    this.index = index;
     this.value = value;
     this.type = type;
     this.link = link;
     this.rect = rect;
-    this.delay = delay;
+    this.transitionInDelay = delay;
   }
 
   update(dT: number) {

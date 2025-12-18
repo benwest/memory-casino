@@ -1,26 +1,18 @@
 import { LinkProps } from "@/state/Char";
 import { State } from "@/state/State";
 import { Rect } from "@/utils/Rect";
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 export interface LinksProps {
   state: State;
-  onClick?: (url: string) => void;
+  onClick?: (link: LinkProps) => void;
 }
 
 export function Links({ state, onClick }: LinksProps) {
-  const links = useMemo(() => {
-    const links = new Map<LinkProps, Rect>();
-    for (const char of state.textLayout.lines.flat()) {
-      if (!char.link) continue;
-      if (!links.has(char.link)) {
-        links.set(char.link, char.rect.clone());
-      } else {
-        links.get(char.link)!.expand(char.rect);
-      }
-    }
-    return links;
-  }, [state]);
+  const links = useSyncExternalStore(
+    update => state.onLayoutUpdated.subscribe(update),
+    () => state.textLayout.linkRects
+  );
 
   const outset = 5;
 
@@ -37,7 +29,7 @@ export function Links({ state, onClick }: LinksProps) {
       }}
       onMouseEnter={() => (state.hoveredLink = link)}
       onMouseLeave={() => (state.hoveredLink = null)}
-      onClick={() => onClick?.(link.url)}
+      onClick={() => onClick?.(link)}
     />
   ));
 }

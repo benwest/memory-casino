@@ -1,41 +1,54 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTick } from "@/hooks/useTick";
 import { useCssVar } from "@/hooks/useCssVar";
 import { State } from "@/state/State";
-import { useSize } from "@/hooks/useSize";
-import { sources } from "@/state/sources";
 import { Rect } from "@/utils/Rect";
+import { useSize } from "@/hooks/useSize";
+import { LinkProps } from "@/state/Char";
 
-export function useTextLayout() {
+export type StateRef = React.RefObject<State | null>;
+
+export function useUpdateState(
+  state: State,
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  textRef: React.RefObject<HTMLDivElement | null>,
+  currentFilm: LinkProps | null = null
+) {
   const windowSize = useWindowSize();
-
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const canvasSize = useSize(canvasRef);
-
   const margin = parseFloat(useCssVar("--page-margin"));
   const charWidth = parseFloat(useCssVar("--char-width"));
   const lineHeight = parseFloat(useCssVar("--line-height"));
-  const state = useMemo(() => {
-    return new State({
-      sources,
-      layout: {
-        maxWidthPx: windowSize[0] - margin * 2,
-        charWidthPx: charWidth,
-        lineHeightPx: lineHeight,
-        gutterWidthPx: canvasSize.width,
-      },
-    });
-  }, [windowSize, margin, charWidth, lineHeight, canvasSize]);
+  const canvasSize = useSize(canvasRef);
 
-  const timeRef = useRef(0);
+  useLayoutEffect(() => {
+    state.layout({
+      charWidthPx: charWidth,
+      lineHeightPx: lineHeight,
+      maxWidthPx: windowSize[0] - margin * 2,
+      gutterWidthPx: canvasSize.width,
+    });
+  }, [charWidth, lineHeight, margin, state, windowSize, canvasSize]);
+
+  const isInitialTransition = useRef(currentFilm === null);
+  useLayoutEffect(() => {
+    if (currentFilm === null) {
+      if (isInitialTransition.current) {
+        isInitialTransition.current = false;
+        state.transitionIn();
+      } else {
+        state.transitionInFast();
+      }
+    } else {
+      state.transitionOut(currentFilm);
+    }
+  }, [state, currentFilm]);
+
   useTick((dT: number) => {
-    timeRef.current += dT;
-    state.update(timeRef.current);
+    state.update(dT);
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (windowSize[0] > 600) return;
     const onScroll = () => {
       state.bodyRevealed = window.scrollY > 0;
@@ -47,16 +60,19 @@ export function useTextLayout() {
     };
   }, [state, windowSize]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateObscuredChars = () => {
       const canvas = canvasRef.current;
       const textDiv = textRef.current;
       if (!canvas || !textDiv) return;
-      state.updateObscuredChars({
-        viewportRect: new Rect(0, 0, window.innerWidth, window.innerHeight),
-        playerRect: Rect.fromDOMRect(canvas.getBoundingClientRect()),
-        textRect: Rect.fromDOMRect(textDiv.getBoundingClientRect()),
-      });
+      state.viewportRect = new Rect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+      );
+      state.playerRect = Rect.fromDOMRect(canvas.getBoundingClientRect());
+      state.textRect = Rect.fromDOMRect(textDiv.getBoundingClientRect());
     };
     const resizeObserver = new ResizeObserver(updateObscuredChars);
     resizeObserver.observe(document.body);
@@ -68,7 +84,7 @@ export function useTextLayout() {
       resizeObserver.disconnect();
       window.removeEventListener("scroll", updateObscuredChars);
     };
-  }, [state]);
+  }, [canvasRef, state, textRef]);
 
-  return { state, canvasRef, textRef };
+  return { canvasRef, textRef };
 }

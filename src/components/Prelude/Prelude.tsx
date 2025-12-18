@@ -1,19 +1,29 @@
 import { toRgbaString } from "@/utils/Color";
 import { Dots } from "../Dots";
 import { RandomPlayer } from "../RandomPlayer";
-import { TextContainer, TextRenderer, useTextLayout } from "../Text";
+import { TextContainer, TextRenderer, useUpdateState } from "../Text";
 import { Links } from "../Links";
 import { State } from "@/state/State";
 import { useTick } from "@/hooks/useTick";
 import { twMerge } from "tailwind-merge";
+import { useRef } from "react";
+import { LinkProps } from "@/state/Char";
 
 export interface PreludeProps {
   running: boolean;
-  setCurrentFilm: (film: string | null) => void;
+  currentFilm: LinkProps | null;
+  setCurrentFilm: (film: LinkProps | null) => void;
 }
 
-export function Prelude({ running, setCurrentFilm }: PreludeProps) {
-  const { state, canvasRef, textRef } = useTextLayout();
+export function Prelude({
+  running,
+  currentFilm,
+  setCurrentFilm,
+}: PreludeProps) {
+  const state = State.instance;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  useUpdateState(state, canvasRef, textRef, currentFilm);
   useBackgroundColor(state);
   return (
     <>
@@ -23,7 +33,7 @@ export function Prelude({ running, setCurrentFilm }: PreludeProps) {
       </TextContainer>
       <TextContainer
         className={twMerge(
-          "absolute top-0 l-0",
+          "absolute top-0 l-0 z-200",
           !running && "pointer-events-none"
         )}
       >

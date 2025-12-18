@@ -75,7 +75,7 @@ export function RandomPlayer({
 const videoCanvas = document.createElement("canvas");
 videoCanvas.width = VIDEO_WIDTH;
 videoCanvas.height = VIDEO_HEIGHT;
-const videoCtx = videoCanvas.getContext("2d")!;
+const videoCtx = videoCanvas.getContext("2d", { colorSpace: "display-p3" })!;
 
 function renderVideo(state: State, canvas: HTMLCanvasElement) {
   const asset = getAsset(state.currentClip?.url || "");
@@ -95,7 +95,7 @@ function renderVideo(state: State, canvas: HTMLCanvasElement) {
   }
   videoCtx.restore();
 
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d", { colorSpace: "display-p3" })!;
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const brightness = remap(state.overlayColor[3], 1, 0, 2, 1);

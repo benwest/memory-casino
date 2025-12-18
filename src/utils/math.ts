@@ -8,6 +8,17 @@ export function remap(
   return ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 }
 
+export function remapClamped(
+  value: number,
+  start1: number,
+  stop1: number,
+  start2: number,
+  stop2: number
+): number {
+  const t = clamp((value - start1) / (stop1 - start1), 0, 1);
+  return start2 + t * (stop2 - start2);
+}
+
 export function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }

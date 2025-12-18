@@ -1,10 +1,8 @@
 import { Rect } from "@/utils/Rect";
 import { Char, LinkProps, CharType } from "./Char";
-import { wrap } from "@/utils/math";
 import { content } from "@/content";
 
 export interface LayoutParams {
-  startTime: number;
   charWidthPx: number;
   lineHeightPx: number;
   maxWidthPx: number;
@@ -52,8 +50,6 @@ export class TextLayout {
   columnWidthChars: number;
   gutterWidthChars: number;
   breakpoint: "small" | "medium" | "large";
-  startTime: number;
-  endTime: number;
   duration: number;
   get widthPx() {
     return this.charWidthPx * this.widthChars;
@@ -61,8 +57,12 @@ export class TextLayout {
   get heightPx() {
     return this.lineHeightPx * this.heightChars;
   }
+  get chars() {
+    return this.lines.flat();
+  }
+  linkRects: Map<LinkProps, Rect>;
 
-  private delay: number;
+  private delay = 0;
   private stack: LayoutContext[] = [
     {
       duration: DURATIONS.fast,
@@ -77,7 +77,6 @@ export class TextLayout {
   constructor(public params: LayoutParams) {
     this.charWidthPx = params.charWidthPx;
     this.lineHeightPx = params.lineHeightPx;
-    this.startTime = this.delay = params.startTime;
 
     const columnWidthPx = (params.maxWidthPx - params.gutterWidthPx) / 2;
     this.columnWidthChars = Math.floor(columnWidthPx / params.charWidthPx);
@@ -161,39 +160,60 @@ export class TextLayout {
 
     while (this.currentLine.length === 0) this.lines.pop();
     this.heightChars = this.lines.length;
-    this.endTime = this.delay;
-    this.duration = this.endTime - this.startTime;
+    this.duration = this.delay;
+
+    const transitionOutOrder = shuffle(this.chars);
+    for (let i = 0; i < transitionOutOrder.length; i++) {
+      const char = transitionOutOrder[i];
+      char.transitionOutDelay = i * 0.0001;
+    }
+
+    this.linkRects = this.getLinkRects();
   }
 
   lineIndexAtTime(time: number) {
     for (let i = this.lines.length - 1; i >= 0; i--) {
       const line = this.lines[i];
       if (line.length === 0) continue;
-      if (time >= line[0].delay) return i;
+      if (time >= line[0].transitionInDelay) return i;
     }
     return 0;
   }
 
   lineDelay(index: number) {
-    const wrappedIndex = wrap(index, 0, this.lines.length);
-    return this.lines[wrappedIndex][0].delay;
+    if (index < 0 || index > this.lines.length) {
+      throw new Error("Line index out of bounds");
+    }
+    return this.lines[index][0].transitionInDelay;
   }
 
   lineDuration(index: number) {
-    const wrappedIndex = wrap(index, 0, this.lines.length);
-    const startTime = this.lines[wrappedIndex][0].delay;
-    const endTime =
-      wrappedIndex + 1 < this.lines.length
-        ? this.lines[wrappedIndex + 1][0].delay
-        : this.endTime;
-    return endTime - startTime;
+    if (index < 0 || index > this.lines.length) {
+      throw new Error("Line index out of bounds");
+    }
+    const line = this.lines[index];
+    if (line.length === 0) return 0;
+    const startTime = line[0].transitionInDelay;
+    if (index === this.lines.length - 1) {
+      return this.duration - startTime;
+    } else {
+      const nextLine = this.lines[index + 1];
+      return nextLine[0].transitionInDelay - startTime;
+    }
   }
-  // loopedLine(time: number) {
-  //   const loops = Math.floor((time - this.startTime) / this.duration);
-  //   const wrappedTime = wrap(time, this.startTime, this.endTime);
-  //   const lineIndex = this.lineAtTime(wrappedTime);
-  //   return loops * this.lines.length + lineIndex;
-  // }
+
+  private getLinkRects(): Map<LinkProps, Rect> {
+    const links = new Map<LinkProps, Rect>();
+    for (const char of this.chars) {
+      if (!char.link) continue;
+      if (!links.has(char.link)) {
+        links.set(char.link, char.rect.clone());
+      } else {
+        links.get(char.link)!.expand(char.rect);
+      }
+    }
+    return links;
+  }
 
   private save() {
     this.stack.push({ ...this.ctx });
@@ -223,9 +243,10 @@ export class TextLayout {
     const y = (this.lines.length - 1) * this.lineHeightPx;
 
     const char = new Char({
+      index: this.chars.length,
       value,
       rect: new Rect(x, y, this.charWidthPx, this.lineHeightPx),
-      delay: this.delay,
+      transitionInDelay: this.delay,
       type: this.ctx.type,
       link: this.ctx.link,
     });
@@ -393,4 +414,13 @@ export class TextLayout {
     }
     return text;
   }
+}
+
+function shuffle<T>(array: T[]): T[] {
+  const result = array.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }

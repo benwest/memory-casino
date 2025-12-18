@@ -1,49 +1,36 @@
-import { Signal } from "@preact/signals-core";
-import { RNG } from "./rng";
-import { SourceData } from "./sources";
+import { RNG } from "@/utils/RNG";
+import { SourceData, sources } from "./sources";
 import { DURATIONS, LayoutParams, PAUSES, TextLayout } from "./TextLayout";
-import { Color } from "../utils/Color";
-import { Keyframes } from "../utils/tween";
-import { clamp, wrap } from "../utils/math";
-import { LinkProps } from "./Char";
+import { Char, LinkProps } from "./Char";
 import { Rect } from "../utils/Rect";
+import { Signal } from "@preact/signals-core";
+import { ClipTimeline } from "./ClipTimeline";
+import {
+  Transition,
+  TransitionIn,
+  TransitionInFast,
+  TransitionOut,
+} from "./Transition";
+import { BLACK } from "./colors";
+import { content } from "@/content";
 
 interface StateParams {
   sources: SourceData[];
-  layout: Omit<LayoutParams, "startTime">;
-}
-
-const BLACK: Color = [0, 0, 0, 1];
-const WHITE: Color = [1, 1, 1, 1];
-const TRANSPARENT_WHITE: Color = [1, 1, 1, 0];
-const GREY: Color = [33 / 255, 34 / 255, 32 / 255, 1];
-
-const BACKGROUND_FADE_DURATION = 4;
-const PLAYER_START_DELAY = BACKGROUND_FADE_DURATION + 2;
-const PLAYER_FADE_DURATION = 0.5;
-
-const BACKGROUND_COLOR_KEYFRAMES = new Keyframes<Color>(BLACK).to(
-  GREY,
-  BACKGROUND_FADE_DURATION
-);
-
-const OVERLAY_COLOR_KEYFRAMES = new Keyframes<Color>(
-  BLACK,
-  PLAYER_START_DELAY - PLAYER_FADE_DURATION
-)
-  .to(WHITE, PLAYER_FADE_DURATION, "quintInOut")
-  .to(WHITE, 1, "quintInOut")
-  .to(TRANSPARENT_WHITE, 0);
-
-interface SourceParams {
-  seed: number;
-  startTime: number;
-  duration: number;
+  layout: LayoutParams;
 }
 
 export class State {
   readonly sources: SourceData[];
-  readonly textLayout: TextLayout;
+  viewportRect = new Rect();
+  playerRect = new Rect();
+  textRect = new Rect();
+
+  textLayout!: TextLayout;
+  clipTimeline!: ClipTimeline;
+  transition!: Transition;
+  transitionStartTime = 0;
+
+  onLayoutUpdated = new Signal();
   private readonly seed = Math.random() * 1_000_000;
 
   backgroundColor = BLACK;
@@ -53,134 +40,193 @@ export class State {
 
   constructor(params: StateParams) {
     this.sources = params.sources;
-    this.textLayout = new TextLayout({ startTime: 14, ...params.layout });
+    this.layout(params.layout);
   }
 
   bodyRevealed = true;
   hoveredLink: LinkProps | null = null;
-  setHoveredLink(link: LinkProps | null) {}
+  linksEnabled = false;
 
-  private lastTime = 0;
-  update(time: number) {
-    const dT = this.lastTime ? clamp(time - this.lastTime, 0, 0.1) : 0;
-    this.lastTime = time;
+  layout(params: LayoutParams) {
+    this.textLayout = new TextLayout(params);
 
-    this.backgroundColor = BACKGROUND_COLOR_KEYFRAMES.sample(time);
-    this.overlayColor = OVERLAY_COLOR_KEYFRAMES.sample(time);
+    this.clipTimeline = new ClipTimeline({
+      initialDelay: 10,
+      initialClips: 16,
+      initialClipDuration:
+        DURATIONS.fast * this.textLayout.widthChars + PAUSES.short,
+      loopDurations: this.textLayout.lines.map((_, i) =>
+        this.textLayout.lineDuration(i)
+      ),
+    });
 
-    const currentSource = this.getCurrentSource(time);
-    this.currentClip = this.selectSource(currentSource);
-    this.preloadClips = this.getPreloadSources(currentSource, 5)
-      .map(source => this.selectSource(source))
-      .filter((s): s is SourceData => s !== null);
+    if (!this.transition) {
+      this.transition = new TransitionIn(this);
+    } else {
+      this.transition = this.transition.refresh();
+    }
+  }
 
-    const chars = this.textLayout.lines.flat();
+  transitionIn() {
+    if (this.transition instanceof TransitionIn) return;
+    this.transition = new TransitionIn(this);
+    this.transitionStartTime = this.time;
+  }
 
-    const spaceIndexes: number[] = [];
-    for (let i = 0; i < chars.length; i++) {
-      const char = chars[i];
-      if (char.value === " " && !char.obscured) spaceIndexes.push(i);
+  transitionInFast() {
+    if (this.transition instanceof TransitionInFast) return;
+    this.transition = new TransitionInFast(this);
+    this.transitionStartTime = this.time;
+  }
+
+  transitionOut(link: LinkProps) {
+    if (this.transition instanceof TransitionOut) return;
+    this.transition = new TransitionOut(this, link);
+    this.transitionStartTime = this.time;
+  }
+
+  time = 0;
+  update(dT: number) {
+    this.time += dT;
+
+    const nextClips = this.clipTimeline.sample(this.time, this.time + 5);
+
+    this.preloadClips = nextClips
+      .map(({ index, duration }) =>
+        this.selectSource(index, duration, this.hoveredLink?.sourceFilter)
+      )
+      .filter((s): s is SourceData => s !== undefined);
+
+    for (const film of content.films) {
+      if (!film.link) continue;
+      const thumbnail = this.getLinkThumbnailSource(film.link);
+      if (thumbnail) this.preloadClips.push(thumbnail);
     }
 
-    const litIndexes: Set<number> = new Set();
-    if (this.currentClip && time > 8) {
-      const hash = RNG.hash(this.currentClip.url);
-      litIndexes.add(RNG.sample(hash, spaceIndexes));
-    }
     if (this.hoveredLink) {
-      const clips = this.sources.filter(source =>
-        source.url.includes(this.hoveredLink!.sourceFilter)
-      );
-      for (const clip of clips) {
-        const hash = RNG.hash(clip.url);
-        litIndexes.add(RNG.sample(hash, spaceIndexes));
+      const thumbnail = this.getLinkThumbnailSource(this.hoveredLink);
+      if (thumbnail) {
+        this.currentClip = thumbnail;
       }
+    } else {
+      this.currentClip =
+        nextClips[0]?.startTime <= this.time ? this.preloadClips[0] : null;
     }
 
-    for (let i = 0; i < chars.length; i++) {
-      const char = chars[i];
+    // this.updateLights();
+    this.transition.update(this.time - this.transitionStartTime);
 
-      char.opacityProps.transitionIn = char.delay <= time;
+    // if (this.animation?.type === "transition-in") {
+    //   const animationTime = this.time - this.animation.startTime;
+    //   for (const char of this.textLayout.chars) {
+    //     char.opacityProps.transitionIn =
+    //       animationTime - this.textStartDelay >= char.transitionInDelay;
+    //     char.opacityProps.transitionOut = false;
+    //   }
+    //   this.backgroundColor = BACKGROUND_COLOR_KEYFRAMES.sample(animationTime);
+    //   this.overlayColor = OVERLAY_COLOR_KEYFRAMES.sample(animationTime);
+    // } else if (this.animation?.type === "transition-in-fast") {
+    //   const animationTime = this.time - this.animation.startTime;
+    //   for (const char of chars) {
+    //     char.opacityProps.transitionIn = true;
+    //     char.opacityProps.transitionOut =
+    //       animationTime <= char.transitionOutDelay;
+    //   }
+    // } else if (this.animation?.type === "transition-out") {
+    //   const animationTime = this.time - this.animation.startTime;
+    //   for (const char of chars) {
+    //     char.opacityProps.transitionIn = true;
+    //     char.opacityProps.transitionOut =
+    //       animationTime >= char.transitionOutDelay;
+    //   }
+    // } else {
+    //   for (const char of chars) {
+    //     char.opacityProps.transitionIn = true;
+    //     char.opacityProps.transitionOut = false;
+    //   }
+    // }
 
-      char.setLit(litIndexes.has(i));
-
-      char.opacityProps.bodyReveal =
-        this.bodyRevealed || char.type !== "body" || char.value === " ";
-
+    for (const char of this.textLayout.chars) {
       char.opacityProps.hover =
         char.value === " " ||
         !this.hoveredLink ||
         char.link === this.hoveredLink;
 
+      char.opacityProps.bodyReveal =
+        this.bodyRevealed || char.type !== "body" || char.value === " ";
+
       char.update(dT);
     }
   }
 
-  updateObscuredChars(layout: {
-    viewportRect: Rect;
-    playerRect: Rect;
-    textRect: Rect;
-  }) {
-    const ox = -layout.textRect.x;
-    const oy = -layout.textRect.y;
-    const textRelativePlayer = layout.playerRect.translate(ox, oy);
-    const textRelativeViewport = layout.viewportRect.translate(ox, oy);
-    for (const char of this.textLayout.lines.flat()) {
-      char.obscured =
-        !textRelativeViewport.intersects(char.rect) ||
-        textRelativePlayer.intersects(char.rect);
+  getVisibleChars() {
+    const ox = -this.textRect.x;
+    const oy = -this.textRect.y;
+    const textRelativePlayer = this.playerRect.clone().translate(ox, oy);
+    const textRelativeViewport = this.viewportRect.clone().translate(ox, oy);
+    return this.textLayout.chars.filter(
+      char =>
+        textRelativeViewport.intersects(char.rect) &&
+        !textRelativePlayer.intersects(char.rect)
+    );
+  }
+
+  clipsForLink(link: LinkProps) {
+    return this.sources.filter(source =>
+      source.url.includes(link.sourceFilter)
+    );
+  }
+
+  illuminateClips(clips: SourceData[]) {
+    const visibleSpaces = this.getVisibleChars().filter(
+      char => char.value === " "
+    );
+
+    const litSpaces = new Set<Char>();
+    if (visibleSpaces.length) {
+      for (const clip of clips) {
+        const hash = RNG.hash(clip.url);
+        litSpaces.add(RNG.sample(hash, visibleSpaces));
+      }
+    }
+
+    for (const char of this.textLayout.chars) {
+      char.setLit(litSpaces.has(char));
     }
   }
 
-  private getCurrentSource(time: number): SourceParams {
-    if (time < this.textLayout.startTime) {
-      const duration =
-        DURATIONS.medium * this.textLayout.widthChars + PAUSES.short;
-      const t = time - this.textLayout.startTime;
-      const seed = Math.floor(t / duration);
-      const startTime = seed * duration + this.textLayout.startTime;
-      return { seed, duration, startTime };
-    } else {
-      const loops = Math.floor(
-        (time - this.textLayout.startTime) / this.textLayout.duration
-      );
-      const loopedTime = wrap(
-        time,
-        this.textLayout.startTime,
-        this.textLayout.endTime
-      );
-      const lineIndex = this.textLayout.lineIndexAtTime(loopedTime);
-      const seed = loops * this.textLayout.heightChars + lineIndex;
-      const startTime =
-        this.textLayout.lineDelay(lineIndex) + loops * this.textLayout.duration;
-      const duration = this.textLayout.lineDuration(lineIndex);
-      return { seed, duration, startTime };
+  illuminateCurrentClips() {
+    const currentClips: SourceData[] = [];
+
+    if (this.hoveredLink) {
+      currentClips.push(...this.clipsForLink(this.hoveredLink));
+    } else if (this.currentClip) {
+      currentClips.push(this.currentClip);
     }
+
+    this.illuminateClips(currentClips);
   }
 
-  private getNextSource(current: SourceParams): SourceParams {
-    return this.getCurrentSource(current.startTime + current.duration);
+  getLinkThumbnailSource(link: LinkProps) {
+    return this.sources.find(source => source.url.includes(link.thumbnail));
   }
 
-  private getPreloadSources(
-    current: SourceParams,
-    duration: number
-  ): SourceParams[] {
-    const sources: SourceParams[] = [current];
-    let totalDuration = current.duration;
-    while (totalDuration < duration) {
-      const next = this.getNextSource(sources[sources.length - 1]);
-      sources.push(next);
-      totalDuration += next.duration;
-    }
-    return sources;
-  }
-
-  private selectSource({ seed, duration }: SourceParams): SourceData | null {
+  private selectSource(seed: number, duration: number, filter?: string) {
     const candidates = this.sources.filter(
-      source => source.duration >= duration
+      source =>
+        source.duration >= duration && (!filter || source.url.includes(filter))
     );
     if (candidates.length === 0) return null;
     return RNG.sample(this.seed + seed, candidates);
   }
+
+  static instance = new State({
+    sources,
+    layout: {
+      charWidthPx: 12,
+      lineHeightPx: 18,
+      maxWidthPx: 600,
+      gutterWidthPx: 40,
+    },
+  });
 }

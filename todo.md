@@ -1,5 +1,5 @@
-- [ ] Player behaviour on hover
-- [ ] pre-text clip timing
+- [x] Player behaviour on hover
+- [x] pre-text clip timing
 - [ ] disable hover until text visible
 - [ ] Film player!
 - [ ] Responsive font size & animation speed
