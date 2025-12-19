@@ -31,6 +31,7 @@
   @variant md {
     --page-margin: 40px;
     --char-width: 12px;
+    --line-height: 16px;
     --font-size-sans: 13px;
     --font-size-serif: 12px;
   }
