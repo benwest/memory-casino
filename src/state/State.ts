@@ -1,6 +1,6 @@
 import { RNG } from "@/utils/RNG";
 import { SourceData, sources } from "./sources";
-import { DURATIONS, TextLayoutParams, PAUSES, TextLayout } from "./TextLayout";
+import { DURATIONS, PAUSES, TextLayout } from "./TextLayout";
 import { Char, LinkProps } from "./Char";
 import { Rect } from "../utils/Rect";
 import { ClipTimeline } from "./ClipTimeline";
@@ -13,8 +13,6 @@ import {
 import { BLACK } from "./colors";
 import { content } from "@/content";
 import { action, computed, observable, configure } from "mobx";
-
-configure({ computedRequiresReaction: true });
 
 interface Params {
   charWidthPx: number;

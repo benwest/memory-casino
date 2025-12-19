@@ -3,7 +3,6 @@ import { toRgbaString } from "../../utils/Color";
 import { State } from "../../state/State";
 import { useTick } from "../../hooks/useTick";
 import { getAsset, preloadAssets } from "./assetCache";
-import { remap } from "@/utils/math";
 import { Rect } from "@/utils/Rect";
 import { autorun } from "mobx";
 
@@ -74,7 +73,7 @@ export function RandomPlayer({
       className="fixed flex justify-center items-center pointer-events-none h-[90svh] lg:h-[96svh] top-[5svh] lg:top-[2svh] left-25 right-25"
       ref={containerRef}
     >
-      <canvas ref={canvasRef} style={{ filter: `blur(7px)` }} />
+      <canvas ref={canvasRef} style={{ filter: `blur(7px) contrast(1.2)` }} />
     </div>
   );
 }
@@ -82,7 +81,7 @@ export function RandomPlayer({
 const videoCanvas = document.createElement("canvas");
 videoCanvas.width = VIDEO_WIDTH;
 videoCanvas.height = VIDEO_HEIGHT;
-const videoCtx = videoCanvas.getContext("2d", { colorSpace: "display-p3" })!;
+const videoCtx = videoCanvas.getContext("2d")!;
 videoCtx.beginPath();
 videoCtx.roundRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT, 9999);
 videoCtx.clip();
@@ -100,7 +99,7 @@ function renderVideo(state: State, canvas: HTMLCanvasElement) {
     videoCtx.drawImage(asset, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
   }
 
-  const ctx = canvas.getContext("2d", { colorSpace: "display-p3" })!;
+  const ctx = canvas.getContext("2d")!;
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(videoCtx.canvas, EXPAND, EXPAND);
