@@ -16,6 +16,7 @@ async function loadVideo(url: string): Promise<HTMLVideoElement> {
   try {
     await video.play();
   } catch (e) {
+    console.log("Autoplay failed for video", url, e);
     throw new AutoplayError();
   }
   video.pause();
