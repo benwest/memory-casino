@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { lazy, useState } from "react";
 import { Prelude } from "../Prelude";
-import { Player } from "../Player";
 import { LinkProps } from "@/state/Char";
+
+const Player = lazy(() =>
+  import("../Player").then(mod => ({ default: mod.Player }))
+);
 
 export function App() {
   const [currentFilm, setCurrentFilm] = useState<LinkProps | null>(null);
