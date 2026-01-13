@@ -64,10 +64,6 @@ export function RandomPlayer({
     renderVideo(state, canvas);
   });
 
-  useEffect(() => {
-    return () => {};
-  }, []);
-
   return (
     <div
       className="fixed flex justify-center items-center pointer-events-none h-[90svh] lg:h-[96svh] top-[5svh] lg:top-[2svh] left-25 right-25"
@@ -99,16 +95,16 @@ function renderVideo(state: State, canvas: HTMLCanvasElement) {
     videoCtx.drawImage(asset, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
   }
 
-  const overlayColor = state.isNewClip
-    ? "white"
-    : toRgbaString(state.overlayColor);
-
   const ctx = canvas.getContext("2d")!;
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(videoCtx.canvas, EXPAND, EXPAND);
   ctx.globalCompositeOperation = "source-atop";
-  ctx.fillStyle = overlayColor;
+  if (state.isNewClip) {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.fillStyle = toRgbaString(state.overlayColor);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
 }

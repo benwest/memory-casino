@@ -1,11 +1,7 @@
-import { ReactNode } from "react";
+import { ComponentProps, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 import "./textContainer.css";
 
-interface TextContainerProps {
-  children: ReactNode;
-  className?: string;
-}
-export function TextContainer({ children, className }: TextContainerProps) {
-  return <div className={twMerge("text-container", className)}>{children}</div>;
+export function TextContainer({ className, ...props }: ComponentProps<"div">) {
+  return <div className={twMerge("text-container", className)} {...props} />;
 }

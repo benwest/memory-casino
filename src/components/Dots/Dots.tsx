@@ -13,7 +13,8 @@ export function Dots({ state }: DotsProps) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useTick(() => {
-    const canvas = ref.current!;
+    const canvas = ref.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
 
     const layout = state.textLayout;

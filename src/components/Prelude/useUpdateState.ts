@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useTick } from "@/hooks/useTick";
 import { useCssVar } from "@/hooks/useCssVar";
@@ -11,12 +11,10 @@ const isTouch = "ontouchstart" in window;
 
 export type StateRef = React.RefObject<State | null>;
 
-export function useUpdateState(
-  state: State,
-  canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  textRef: React.RefObject<HTMLDivElement | null>,
-  currentFilm: LinkProps | null = null
-) {
+export function useUpdateState(state: State) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+
   const windowSize = useWindowSize();
   const margin = parseFloat(useCssVar("--page-margin"));
   const charWidth = parseFloat(useCssVar("--char-width"));
@@ -31,19 +29,25 @@ export function useUpdateState(
     });
   }, [charWidth, lineHeight, margin, state, windowSize, canvasSize]);
 
+  const [currentFilm, _setCurrentFilm] = useState<LinkProps | null>(null);
   const isInitialTransition = useRef(currentFilm === null);
-  useLayoutEffect(() => {
-    if (currentFilm === null) {
-      if (isInitialTransition.current) {
-        isInitialTransition.current = false;
-        state.transitionIn();
+  const setCurrentFilm = useCallback(
+    (film: LinkProps | null) => {
+      console.log("Setting current film to", film);
+      if (film === null) {
+        if (isInitialTransition.current) {
+          isInitialTransition.current = false;
+          state.transitionIn();
+        } else {
+          state.transitionInFast();
+        }
       } else {
-        state.transitionInFast();
+        state.transitionOut(isTouch ? undefined : film);
       }
-    } else {
-      state.transitionOut(isTouch ? undefined : currentFilm);
-    }
-  }, [state, currentFilm]);
+      _setCurrentFilm(film);
+    },
+    [_setCurrentFilm, state]
+  );
 
   useTick((dT: number) => {
     state.update(dT);
@@ -87,5 +91,5 @@ export function useUpdateState(
     };
   }, [canvasRef, state, textRef]);
 
-  return { canvasRef, textRef };
+  return { canvasRef, textRef, currentFilm, setCurrentFilm };
 }
