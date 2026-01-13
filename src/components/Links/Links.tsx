@@ -33,7 +33,11 @@ export function Links({ state, onClick }: LinksProps) {
       onMouseLeave={
         !isTouch ? () => state.setParams({ hoveredLink: null }) : undefined
       }
-      onClick={() => onClick?.(link)}
+      onClick={e => {
+        e.stopPropagation();
+        console.log("Link clicked:", link);
+        onClick?.(link);
+      }}
     />
   ));
 }

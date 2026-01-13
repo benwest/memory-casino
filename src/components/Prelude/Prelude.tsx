@@ -13,19 +13,18 @@ import { autorun } from "mobx";
 
 export interface PreludeProps {
   running: boolean;
-  currentFilm: LinkProps | null;
   setCurrentFilm: (film: LinkProps | null) => void;
+  textRef: React.RefObject<HTMLDivElement | null>;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
 }
 
 export function Prelude({
   running,
-  currentFilm,
   setCurrentFilm,
+  textRef,
+  canvasRef,
 }: PreludeProps) {
   const state = State.instance;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  useUpdateState(state, canvasRef, textRef, currentFilm);
   useBackgroundColor(state);
   return (
     <>
@@ -38,6 +37,7 @@ export function Prelude({
           "absolute top-0 l-0 z-200",
           !running && "pointer-events-none"
         )}
+        onClick={() => state.skipForward()}
       >
         <div ref={textRef} className="relative">
           <TextRenderer state={state} />

@@ -12,23 +12,16 @@ export interface Transition {
 }
 
 export class TransitionIn implements Transition {
-  @computed get textStartDelay() {
-    return (
-      this.state.clipTimeline.initialDelay +
-      this.state.clipTimeline.initialClips *
-        this.state.clipTimeline.initialClipDuration
-    );
-  }
   @computed get backgroundColorKeyframes() {
     return new Keyframes<Color>(BLACK).to(
       GREY,
-      this.state.clipTimeline.initialDelay,
+      this.state.clipTimeline.transitionInDuration,
       "quadOut"
     );
   }
   @computed get overlayColorKeyframes() {
     return new Keyframes<Color>(BLACK)
-      .to(WHITE, this.state.clipTimeline.initialDelay, "quadIn")
+      .to(WHITE, this.state.clipTimeline.transitionInDuration, "quadIn")
       .to(TRANSPARENT_WHITE, 0);
   }
 
@@ -38,10 +31,10 @@ export class TransitionIn implements Transition {
     const state = this.state;
     for (const char of state.textLayout.chars) {
       char.opacityProps.transitionIn =
-        time - this.textStartDelay >= char.transitionInDelay;
+        time - state.clipTimeline.getLoopStartTime(0) >= char.transitionInDelay;
       char.opacityProps.transitionOut = false;
     }
-    state.linksEnabled = time >= this.textStartDelay;
+    state.linksEnabled = time >= state.clipTimeline.getLoopStartTime(0);
     state.backgroundColor = this.backgroundColorKeyframes.sample(time);
     state.overlayColor = this.overlayColorKeyframes.sample(time);
 
@@ -78,6 +71,7 @@ export class TransitionOut implements Transition {
   overlayColorKeyframes = new Keyframes<Color>(WHITE).to(BLACK, 1, "quintOut");
 
   constructor(private state: State, link?: LinkProps) {
+    console.log("transition out started");
     this.transitionOrder = link ? state.clipsForLink(link) : [];
   }
 

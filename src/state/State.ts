@@ -12,7 +12,7 @@ import {
 } from "./Transition";
 import { BLACK } from "./colors";
 import { content } from "@/content";
-import { action, computed, observable, configure } from "mobx";
+import { action, computed, observable } from "mobx";
 
 interface Params {
   charWidthPx: number;
@@ -50,7 +50,7 @@ export class State {
 
   @computed get clipTimeline() {
     return new ClipTimeline({
-      initialDelay: 10,
+      transitionInDuration: 10,
       initialClips: 16,
       initialClipDuration:
         DURATIONS.fast * this.textLayout.widthChars + PAUSES.short,
@@ -71,6 +71,7 @@ export class State {
   @observable accessor isNewClip = false;
   @observable.struct accessor preloadClips: SourceData[] = [];
   @observable accessor linksEnabled = false;
+  @observable.ref accessor currentFilm: LinkProps | null = null;
 
   @action setParams(params: Partial<Params>) {
     Object.assign(this.params, params);
@@ -139,6 +140,22 @@ export class State {
         bodyRevealed || char.type !== "body" || char.value === " ";
 
       char.update(dT);
+    }
+  }
+
+  skipForward() {
+    let toTime: number;
+    const loop0 = this.clipTimeline.getLoopStartTime(0);
+    const loop1 = this.clipTimeline.getLoopStartTime(1);
+    if (this.time < loop0) {
+      toTime = loop0;
+    } else if (this.time < loop1) {
+      toTime = loop1;
+    } else {
+      return;
+    }
+    if (toTime > this.time) {
+      this.update(toTime - this.time);
     }
   }
 

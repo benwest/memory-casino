@@ -1,12 +1,12 @@
 interface ClipTimelineParams {
-  initialDelay: number;
+  transitionInDuration: number;
   initialClips: number;
   initialClipDuration: number;
   loopDurations: number[];
 }
 
 export class ClipTimeline {
-  readonly initialDelay: number;
+  readonly transitionInDuration: number;
   readonly initialClips: number;
   readonly initialClipDuration: number;
   readonly loopDelays: readonly number[];
@@ -14,7 +14,7 @@ export class ClipTimeline {
   readonly totalLoopDuration: number;
 
   constructor(params: ClipTimelineParams) {
-    this.initialDelay = params.initialDelay;
+    this.transitionInDuration = params.transitionInDuration;
     this.initialClips = params.initialClips;
     this.initialClipDuration = params.initialClipDuration;
     const loopDelays = [0];
@@ -27,7 +27,7 @@ export class ClipTimeline {
   }
 
   private getDuration(index: number): number {
-    if (index === -1) return this.initialDelay;
+    if (index === -1) return this.transitionInDuration;
     if (index < this.initialClips) return this.initialClipDuration;
     const loopIndex = (index - this.initialClips) % this.loopDurations.length;
     return this.loopDurations[loopIndex];
@@ -37,7 +37,7 @@ export class ClipTimeline {
     if (index === -1) return 0;
 
     if (index < this.initialClips) {
-      return this.initialDelay + index * this.initialClipDuration;
+      return this.transitionInDuration + index * this.initialClipDuration;
     }
 
     const initialDuration = this.initialClips * this.initialClipDuration;
@@ -48,7 +48,7 @@ export class ClipTimeline {
     const partialLoopDuration = this.loopDelays[indexInLoop];
 
     return (
-      this.initialDelay +
+      this.transitionInDuration +
       initialDuration +
       loopsCompleted * this.totalLoopDuration +
       partialLoopDuration
@@ -56,14 +56,17 @@ export class ClipTimeline {
   }
 
   private getIndexAtTime(time: number) {
-    if (time < this.initialDelay) return -1;
+    if (time < this.transitionInDuration) return -1;
 
     const initialClipsDuration = this.initialClips * this.initialClipDuration;
-    if (time < this.initialDelay + initialClipsDuration) {
-      return Math.floor((time - this.initialDelay) / this.initialClipDuration);
+    if (time < this.transitionInDuration + initialClipsDuration) {
+      return Math.floor(
+        (time - this.transitionInDuration) / this.initialClipDuration
+      );
     }
 
-    const timeInLoops = time - (this.initialDelay + initialClipsDuration);
+    const timeInLoops =
+      time - (this.transitionInDuration + initialClipsDuration);
     const loopTotalDuration = this.loopDurations.reduce((sum, d) => sum + d, 0);
     const loopsCompleted = Math.floor(timeInLoops / loopTotalDuration);
     const timeInCurrentLoop = timeInLoops % loopTotalDuration;
@@ -76,6 +79,14 @@ export class ClipTimeline {
     }
 
     throw new Error("Unreachable");
+  }
+
+  getLoopStartTime(index: number): number {
+    return (
+      this.transitionInDuration +
+      this.initialClips * this.initialClipDuration +
+      this.totalLoopDuration * index
+    );
   }
 
   sample(fromTime: number, toTime: number) {
