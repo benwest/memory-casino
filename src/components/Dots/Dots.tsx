@@ -25,7 +25,7 @@ export function Dots({ state }: DotsProps) {
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
     ctx.fillStyle = YELLOW;
-    const dotRadius = 0.6;
+    const dotRadius = 0.8;
 
     const chars = layout.lines.flat();
     for (let i = 0; i < chars.length; i++) {

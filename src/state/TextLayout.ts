@@ -23,8 +23,8 @@ const smallSpaces = {
 
 export const DURATIONS = {
   slow: 1 / 20,
-  medium: 1 / 400,
-  fast: 1 / 400,
+  medium: 1 / 200,
+  fast: 1 / 800,
 };
 
 export const PAUSES = {
@@ -33,7 +33,7 @@ export const PAUSES = {
 };
 
 const minColumnSizeLarge = 40;
-const minColumnSizeMedium = 25;
+const minColumnSizeMedium = 27;
 
 interface LayoutContext {
   duration: number;
@@ -79,9 +79,9 @@ export class TextLayout {
     const columnWidthPx = (params.maxWidthPx - params.gutterWidthPx) / 2;
     this.columnWidthChars = Math.floor(columnWidthPx / params.charWidthPx);
 
-    if (this.columnWidthChars >= minColumnSizeLarge) {
+    /*if (this.columnWidthChars >= minColumnSizeLarge) {
       this.breakpoint = "large";
-    } else if (this.columnWidthChars >= minColumnSizeMedium) {
+    } else*/ if (this.columnWidthChars >= minColumnSizeMedium) {
       this.breakpoint = "medium";
     } else {
       this.breakpoint = "small";
@@ -194,7 +194,7 @@ export class TextLayout {
     }
   }
 
-  private getLinkRects(): Map<LinkProps, Rect> {
+  private getLinkRects() {
     const links = new Map<LinkProps, Rect>();
     for (const char of this.chars) {
       if (!char.link) continue;
@@ -286,36 +286,65 @@ export class TextLayout {
   private pushMediumHeader() {
     this.save();
 
-    this.ctx.duration = DURATIONS.slow;
-
-    const pushLink = (film: (typeof content.films)[0]) => {
+    for (let i = 0; i < content.films.length; i++) {
       this.save();
+      if (i === 0) {
+        this.ctx.duration = DURATIONS.slow;
+        this.ctx.type = "title";
+        this.push(content.title);
+        this.ctx.duration = DURATIONS.slow;
+        this.push(
+          " ".repeat(
+            this.columnWidthChars + this.gutterWidthChars - content.title.length
+          )
+        );
+      } else {
+        this.ctx.duration = DURATIONS.slow;
+        this.push(" ".repeat(this.columnWidthChars + this.gutterWidthChars));
+      }
+      this.restore();
+
+      this.save();
+      const film = content.films[i];
+      this.ctx.duration = DURATIONS.slow;
       this.ctx.link = film.link;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(
         this.spaceBetween(film.shortTitle, film.subtitle, this.columnWidthChars)
       );
       this.restore();
-    };
 
-    this.save();
-    this.ctx.type = "title";
-    this.push(content.title);
-    const spaces =
-      this.columnWidthChars - content.title.length + this.gutterWidthChars;
-    this.push(" ".repeat(spaces));
-    this.restore();
+      this.wait(PAUSES.long);
+    }
 
-    pushLink(content.films[0]);
-    this.wait(PAUSES.long);
-    this.ctx.duration = DURATIONS.fast;
-    this.newline();
-    this.newline();
-    this.wait(PAUSES.long);
-    this.push(" ".repeat(this.columnWidthChars + this.gutterWidthChars));
-    this.ctx.duration = DURATIONS.slow;
-    pushLink(content.films[1]);
-    this.wait(PAUSES.long);
+    // const pushLink = (film: (typeof content.films)[0]) => {
+    //   this.save();
+    //   this.ctx.link = film.link;
+    //   this.ctx.type = film.link ? "link" : "inactive-link";
+    //   this.push(
+    //     this.spaceBetween(film.shortTitle, film.subtitle, this.columnWidthChars)
+    //   );
+    //   this.restore();
+    // };
+
+    // this.save();
+    // this.ctx.type = "title";
+    // this.push(content.title);
+    // const spaces =
+    //   this.columnWidthChars - content.title.length + this.gutterWidthChars;
+    // this.push(" ".repeat(spaces));
+    // this.restore();
+
+    // pushLink(content.films[0]);
+    // this.wait(PAUSES.long);
+    // this.ctx.duration = DURATIONS.fast;
+    // this.newline();
+    // this.newline();
+    // this.wait(PAUSES.long);
+    // this.push(" ".repeat(this.columnWidthChars + this.gutterWidthChars));
+    // this.ctx.duration = DURATIONS.slow;
+    // pushLink(content.films[1]);
+    // this.wait(PAUSES.long);
 
     this.restore();
   }
@@ -339,11 +368,6 @@ export class TextLayout {
       this.ctx.link = film.link;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(film.shortTitle.padEnd(halfWidth, " "));
-    }
-    this.wait(PAUSES.short);
-    for (const film of content.films) {
-      this.ctx.link = film.link;
-      this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(film.subtitle.padEnd(halfWidth, " "));
     }
     this.wait(PAUSES.long);

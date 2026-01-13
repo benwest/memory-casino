@@ -99,12 +99,16 @@ function renderVideo(state: State, canvas: HTMLCanvasElement) {
     videoCtx.drawImage(asset, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
   }
 
+  const overlayColor = state.isNewClip
+    ? "white"
+    : toRgbaString(state.overlayColor);
+
   const ctx = canvas.getContext("2d")!;
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(videoCtx.canvas, EXPAND, EXPAND);
   ctx.globalCompositeOperation = "source-atop";
-  ctx.fillStyle = toRgbaString(state.overlayColor);
+  ctx.fillStyle = overlayColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
 }

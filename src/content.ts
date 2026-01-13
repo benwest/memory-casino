@@ -6,7 +6,7 @@ export const content = {
       shortTitle: "PART ONE",
       subtitle: "PLAY [06:05]",
       link: {
-        url: "https://player.vimeo.com/external/923559760.m3u8?s=fd02e1d140d68c1c00077ae6b3331fbb10369b1a&logging=false",
+        url: "https://player.vimeo.com/external/1150464992.m3u8?s=1b2022d58b01004010d70f08e13b2f52df3c7ceb&logging=false",
         sourceFilter: "MC1",
         thumbnail: "MC1_00000",
       },
@@ -14,7 +14,13 @@ export const content = {
     {
       longTitle: "MEMORY CASINO  PART TWO",
       shortTitle: "PART TWO",
-      subtitle: "TO COME",
+      subtitle: "[TO COME]",
+      link: undefined,
+    },
+    {
+      longTitle: "MEMORY CASINO  PART THREE",
+      shortTitle: "PART THREE",
+      subtitle: "[TO COME]",
       link: undefined,
     },
   ],
@@ -26,6 +32,6 @@ export const content = {
     `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producer[:]DIANDRA ARRIGA[;]Cinematographer[:]EDSON REYES[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
     `VARIATION 1[:]Composed and Performed by[:]QUR'AN SHAHEED[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING`,
     `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA, CDMX[;]and[:]LA TORRE, LOS ANGELES`,
-    `Designed by[:]A. TEATRO[;]Website by[:]BEN WEST`,
+    `Titles by[:]A. TEATRO[;]Website by[:]BEN WEST`,
   ],
 };

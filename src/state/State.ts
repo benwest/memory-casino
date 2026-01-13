@@ -68,6 +68,7 @@ export class State {
   @observable.ref accessor backgroundColor = BLACK;
   @observable.ref accessor overlayColor = BLACK;
   @observable.struct accessor currentClip: SourceData | null = null;
+  @observable accessor isNewClip = false;
   @observable.struct accessor preloadClips: SourceData[] = [];
   @observable accessor linksEnabled = false;
 
@@ -114,6 +115,7 @@ export class State {
       if (thumbnail) this.preloadClips.push(thumbnail);
     }
 
+    const prevClip = this.currentClip;
     if (hoveredLink) {
       const thumbnail = this.getLinkThumbnailSource(hoveredLink);
       if (thumbnail) {
@@ -123,6 +125,7 @@ export class State {
       this.currentClip =
         nextClips[0]?.startTime <= this.time ? this.preloadClips[0] : null;
     }
+    this.isNewClip = this.currentClip !== prevClip;
 
     this.transition.update(this.time - this.transitionStartTime);
 
