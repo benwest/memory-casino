@@ -83,11 +83,7 @@ export class Char {
       );
     }
     if (this.lit) {
-      this.lightBrightness = moveTowards(
-        this.lightBrightness,
-        1,
-        dT / LIGHT_FADE_IN_DURATION
-      );
+      this.lightBrightness = 1;
     } else {
       this.lightBrightness = lerpSmooth(this.lightBrightness, 0, dT, 0.1);
     }
