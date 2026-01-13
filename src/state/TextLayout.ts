@@ -94,15 +94,15 @@ export class TextLayout {
 
     this.gutterWidthChars = this.widthChars - this.columnWidthChars * 2;
 
-    if (this.breakpoint === "large") {
+    /*if (this.breakpoint === "large") {
       this.pushLargeHeader();
-    } else if (this.breakpoint === "medium") {
+    } else*/ if (this.breakpoint === "medium") {
       this.pushMediumHeader();
     } else {
       this.pushSmallHeader();
     }
 
-    const emptyLines = this.breakpoint === "large" ? 7 : 6;
+    const emptyLines = /*this.breakpoint === "large" ? 7 : */ 6;
     this.ctx.duration = DURATIONS.fast;
     this.ctx.type = "gap";
     for (let i = 0; i < emptyLines; i++) {
@@ -112,7 +112,7 @@ export class TextLayout {
     this.wait(PAUSES.long);
 
     const spaceReplacements =
-      this.breakpoint === "large" ? bigSpaces : smallSpaces;
+      /*this.breakpoint === "large" ? bigSpaces : */ smallSpaces;
 
     for (let i = 0; i < content.body.length; i++) {
       const spaced = this.replace(content.body[i], spaceReplacements);
