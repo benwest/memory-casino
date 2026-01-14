@@ -20,9 +20,13 @@ export function App() {
         setCurrentFilm={setCurrentFilm}
         running={currentFilm === null}
       />
-      {currentFilm !== null && (
+      {currentFilm?.link && (
         <Suspense fallback={null}>
-          <Player src={currentFilm.url} close={() => setCurrentFilm(null)} />
+          <Player
+            title={currentFilm.shortTitle}
+            src={currentFilm.link.url}
+            close={() => setCurrentFilm(null)}
+          />
         </Suspense>
       )}
     </>

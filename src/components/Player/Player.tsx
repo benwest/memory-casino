@@ -12,12 +12,16 @@ import {
 } from "@vidstack/react";
 import "@vidstack/react/player/styles/base.css";
 import { twMerge } from "tailwind-merge";
+import { content } from "@/content";
+
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 interface PlayerProps {
+  title: string;
   src: string;
   close: () => void;
 }
-export function Player({ src, close }: PlayerProps) {
+export function Player({ src, title, close }: PlayerProps) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -49,10 +53,9 @@ export function Player({ src, close }: PlayerProps) {
         className={styles.mediaPlayer}
         src={src}
         autoPlay
-        onFullscreenChange={(isFullscreen, event) => {
-          console.log("fullscreen change", isFullscreen, event);
-          // todo: only if not playing inline
-          if (!isFullscreen) close();
+        onFullscreenChange={isFullscreen => {
+          // poor check for if we are playing fullscreen mobile-style instead of inline
+          if (!isFullscreen && isMobile) close();
         }}
         onProviderChange={onProviderChange}
         onLoadedMetadata={() => setMetadataLoaded(true)}
@@ -60,6 +63,8 @@ export function Player({ src, close }: PlayerProps) {
         <MediaProvider className={styles.mediaProvider} onClick={togglePlay} />
         <Controls.Root className={styles.controls}>
           <Controls.Group className={styles.controlsGroup}>
+            <div>{content.title}</div>
+            <div>{title}</div>
             <TimeSlider.Root className={styles.slider}>
               <TimeSlider.Track className={styles.track}>
                 <TimeSlider.TrackFill

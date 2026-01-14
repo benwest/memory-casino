@@ -1,6 +1,6 @@
 import { Rect } from "@/utils/Rect";
-import { Char, LinkProps, CharType } from "./Char";
-import { content } from "@/content";
+import { Char, CharType } from "./Char";
+import { content, FilmContent } from "@/content";
 
 export interface TextLayoutParams {
   charWidthPx: number;
@@ -37,7 +37,7 @@ const minColumnSizeMedium = 27;
 
 interface LayoutContext {
   duration: number;
-  link: LinkProps | undefined;
+  film: FilmContent | undefined;
   type: CharType;
 }
 
@@ -58,13 +58,13 @@ export class TextLayout {
   get heightPx() {
     return this.lineHeightPx * this.heightChars;
   }
-  readonly linkRects: Map<LinkProps, Rect>;
+  readonly linkRects: Map<FilmContent, Rect>;
 
   private delay = 0;
   private stack: LayoutContext[] = [
     {
       duration: DURATIONS.fast,
-      link: undefined as LinkProps | undefined,
+      film: undefined as FilmContent | undefined,
       type: "body" as CharType,
     },
   ];
@@ -195,13 +195,13 @@ export class TextLayout {
   }
 
   private getLinkRects() {
-    const links = new Map<LinkProps, Rect>();
+    const links = new Map<FilmContent, Rect>();
     for (const char of this.chars) {
-      if (!char.link) continue;
-      if (!links.has(char.link)) {
-        links.set(char.link, char.rect.clone());
+      if (!char.film?.link) continue;
+      if (!links.has(char.film)) {
+        links.set(char.film, char.rect.clone());
       } else {
-        links.get(char.link)!.expand(char.rect);
+        links.get(char.film)!.expand(char.rect);
       }
     }
     return links;
@@ -240,7 +240,7 @@ export class TextLayout {
       rect: new Rect(x, y, this.charWidthPx, this.lineHeightPx),
       transitionInDelay: this.delay,
       type: this.ctx.type,
-      link: this.ctx.link,
+      film: this.ctx.film,
     });
     this.currentLine.push(char);
     this.chars.push(char);
@@ -265,7 +265,7 @@ export class TextLayout {
 
     const pushLink = (film: (typeof content.films)[0]) => {
       this.save();
-      this.ctx.link = film.link;
+      this.ctx.film = film;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(
         this.spaceBetween(film.longTitle, film.subtitle, this.columnWidthChars)
@@ -307,7 +307,7 @@ export class TextLayout {
       this.save();
       const film = content.films[i];
       this.ctx.duration = DURATIONS.slow;
-      this.ctx.link = film.link;
+      this.ctx.film = film;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(
         this.spaceBetween(film.shortTitle, film.subtitle, this.columnWidthChars)
@@ -316,35 +316,6 @@ export class TextLayout {
 
       this.wait(PAUSES.long);
     }
-
-    // const pushLink = (film: (typeof content.films)[0]) => {
-    //   this.save();
-    //   this.ctx.link = film.link;
-    //   this.ctx.type = film.link ? "link" : "inactive-link";
-    //   this.push(
-    //     this.spaceBetween(film.shortTitle, film.subtitle, this.columnWidthChars)
-    //   );
-    //   this.restore();
-    // };
-
-    // this.save();
-    // this.ctx.type = "title";
-    // this.push(content.title);
-    // const spaces =
-    //   this.columnWidthChars - content.title.length + this.gutterWidthChars;
-    // this.push(" ".repeat(spaces));
-    // this.restore();
-
-    // pushLink(content.films[0]);
-    // this.wait(PAUSES.long);
-    // this.ctx.duration = DURATIONS.fast;
-    // this.newline();
-    // this.newline();
-    // this.wait(PAUSES.long);
-    // this.push(" ".repeat(this.columnWidthChars + this.gutterWidthChars));
-    // this.ctx.duration = DURATIONS.slow;
-    // pushLink(content.films[1]);
-    // this.wait(PAUSES.long);
 
     this.restore();
   }
@@ -365,7 +336,7 @@ export class TextLayout {
 
     this.ctx.duration = DURATIONS.slow;
     for (const film of content.films) {
-      this.ctx.link = film.link;
+      this.ctx.film = film;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(film.shortTitle.padEnd(halfWidth, " "));
       this.push(film.subtitle.padEnd(halfWidth, " "));

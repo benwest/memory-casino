@@ -1,7 +1,7 @@
 import { RNG } from "@/utils/RNG";
 import { SourceData, sources } from "./sources";
 import { DURATIONS, PAUSES, TextLayout } from "./TextLayout";
-import { Char, LinkProps } from "./Char";
+import { Char } from "./Char";
 import { Rect } from "../utils/Rect";
 import { ClipTimeline } from "./ClipTimeline";
 import {
@@ -11,7 +11,7 @@ import {
   TransitionOut,
 } from "./Transition";
 import { BLACK } from "./colors";
-import { content } from "@/content";
+import { content, FilmContent } from "@/content";
 import { action, computed, observable } from "mobx";
 
 interface Params {
@@ -21,7 +21,7 @@ interface Params {
   viewportRect: Rect;
   playerRect: Rect;
   textRect: Rect;
-  hoveredLink: LinkProps | null;
+  hoveredFilm: FilmContent | null;
   bodyRevealed: boolean;
 }
 
@@ -35,7 +35,7 @@ export class State {
     viewportRect: new Rect(),
     playerRect: new Rect(),
     textRect: new Rect(),
-    hoveredLink: null,
+    hoveredFilm: null,
     bodyRevealed: true,
   };
 
@@ -71,7 +71,7 @@ export class State {
   @observable accessor isNewClip = false;
   @observable.struct accessor preloadClips: SourceData[] = [];
   @observable accessor linksEnabled = false;
-  @observable.ref accessor currentFilm: LinkProps | null = null;
+  @observable.ref accessor currentFilm: FilmContent | null = null;
 
   @action setParams(params: Partial<Params>) {
     Object.assign(this.params, params);
@@ -92,33 +92,33 @@ export class State {
     this.setTransition(new TransitionInFast(this));
   }
 
-  transitionOut(link?: LinkProps) {
+  transitionOut(toFilm?: FilmContent) {
     if (this.transition instanceof TransitionOut) return;
-    this.setTransition(new TransitionOut(this, link));
+    this.setTransition(new TransitionOut(this, toFilm));
   }
 
   private time = 0;
   @action update(dT: number) {
     this.time += dT;
-    const { hoveredLink, bodyRevealed } = this.params;
+    const { hoveredFilm, bodyRevealed } = this.params;
 
     const nextClips = this.clipTimeline.sample(this.time, this.time + 5);
 
     this.preloadClips = nextClips
       .map(({ index, duration }) =>
-        this.selectSource(index, duration, hoveredLink?.sourceFilter)
+        this.selectSource(index, duration, hoveredFilm?.link?.sourceFilter)
       )
       .filter((s): s is SourceData => s !== undefined);
 
     for (const film of content.films) {
       if (!film.link) continue;
-      const thumbnail = this.getLinkThumbnailSource(film.link);
+      const thumbnail = this.getFilmThumbnailSource(film);
       if (thumbnail) this.preloadClips.push(thumbnail);
     }
 
     const prevClip = this.currentClip;
-    if (hoveredLink) {
-      const thumbnail = this.getLinkThumbnailSource(hoveredLink);
+    if (hoveredFilm?.link) {
+      const thumbnail = this.getFilmThumbnailSource(hoveredFilm);
       if (thumbnail) {
         this.currentClip = thumbnail;
       }
@@ -133,8 +133,8 @@ export class State {
     for (const char of this.textLayout.chars) {
       char.opacityProps.hover =
         char.value === " " ||
-        !hoveredLink ||
-        char.link?.url === hoveredLink.url;
+        !hoveredFilm ||
+        char.film?.link?.url === hoveredFilm?.link?.url;
 
       char.opacityProps.bodyReveal =
         bodyRevealed || char.type !== "body" || char.value === " ";
@@ -173,9 +173,9 @@ export class State {
     );
   }
 
-  clipsForLink(link: LinkProps) {
+  clipsForFilm(film: FilmContent) {
     return this.sources.filter(source =>
-      source.url.includes(link.sourceFilter)
+      source.url.includes(film.link?.sourceFilter ?? "")
     );
   }
 
@@ -196,8 +196,8 @@ export class State {
   illuminateCurrentClips() {
     const currentClips: SourceData[] = [];
 
-    if (this.params.hoveredLink) {
-      currentClips.push(...this.clipsForLink(this.params.hoveredLink));
+    if (this.params.hoveredFilm) {
+      currentClips.push(...this.clipsForFilm(this.params.hoveredFilm));
     } else if (this.currentClip) {
       currentClips.push(this.currentClip);
     }
@@ -205,7 +205,9 @@ export class State {
     this.illuminateClips(currentClips);
   }
 
-  getLinkThumbnailSource(link: LinkProps) {
+  getFilmThumbnailSource(film: FilmContent) {
+    const link = film.link;
+    if (!link) return undefined;
     return this.sources.find(source => source.url.includes(link.thumbnail));
   }
 

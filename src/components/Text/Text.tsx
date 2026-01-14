@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { getCssVar } from "@/utils/cssVars";
 import { Color, hexToRgba, lerpColors, toRgbaString } from "@/utils/Color";
 import { State } from "@/state/State";
-import { autorun } from "mobx";
+import { autorun, set } from "mobx";
 import { useCssVar } from "@/hooks/useCssVar";
 
 const YELLOW = hexToRgba(getCssVar("--color-yellow"));
@@ -13,6 +13,11 @@ interface TextRendererProps {
 }
 
 const lightRadius = 20;
+const lightCanvas = createLightGradient(
+  lightRadius,
+  YELLOW,
+  setAlpha(YELLOW, 0)
+);
 
 export function TextRenderer({ state }: TextRendererProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -70,43 +75,43 @@ function renderText(ctx: CanvasRenderingContext2D, state: State) {
       ctx.fillText(char.value, char.rect.cx, char.rect.cy);
     }
     if (char.lightBrightness > 0) {
-      ctx.globalAlpha = 1;
-      drawLight(
-        ctx,
-        char.rect.cx,
-        char.rect.cy,
-        setAlpha(YELLOW, char.lightBrightness),
-        setAlpha(YELLOW, 0)
+      ctx.globalAlpha = char.lightBrightness;
+      ctx.drawImage(
+        lightCanvas,
+        char.rect.cx - lightCanvas.width / 2,
+        char.rect.cy - lightCanvas.height / 2
       );
     }
   }
 }
 
-function drawLight(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  fromColor: Color,
-  toColor: Color
-) {
+function createLightGradient(r: number, fromColor: Color, toColor: Color) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+  canvas.width = canvas.height = lightRadius * 2;
+  const gradient = ctx.createRadialGradient(r, r, 0, r, r, r);
   const numStops = 10;
-  const lightGradient = ctx.createRadialGradient(x, y, 0, x, y, lightRadius);
+  let css = `radial-gradient(circle at center, `;
   for (let i = 0; i <= numStops; i++) {
     const t = i / numStops;
     const g = gaussian(t);
     const color = lerpColors(fromColor, toColor, g);
-    lightGradient.addColorStop(t, toRgbaString(color));
+    gradient.addColorStop(t, toRgbaString(color));
+    css += `${toRgbaString(color)} ${Math.round(t * 100 * Math.sqrt(0.5))}%`;
+    if (i < numStops) css += ", ";
   }
-  ctx.fillStyle = lightGradient;
-  ctx.beginPath();
-  ctx.arc(x, y, lightRadius, 0, Math.PI * 2);
-  ctx.fill();
+  css += ")";
+  console.log(css);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  return canvas;
 }
 
 function setAlpha(color: Color, alpha: number): Color {
   return [color[0], color[1], color[2], alpha];
 }
 
-function gaussian(t: number): number {
-  return 1 - Math.exp(-Math.pow(t * 2, 2));
+function gaussian(t: number, sigma = 0.5): number {
+  const denom = 1 - Math.exp(-1 / (2 * sigma * sigma));
+  return (1 - Math.exp((-t * t) / (2 * sigma * sigma))) / denom;
 }

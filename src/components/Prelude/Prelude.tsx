@@ -4,16 +4,14 @@ import { RandomPlayer } from "../RandomPlayer";
 import { TextContainer, TextRenderer } from "../Text";
 import { Links } from "../Links";
 import { State } from "@/state/State";
-import { useTick } from "@/hooks/useTick";
 import { twMerge } from "tailwind-merge";
-import { useEffect, useRef } from "react";
-import { LinkProps } from "@/state/Char";
-import { useUpdateState } from "./useUpdateState";
+import { useEffect } from "react";
 import { autorun } from "mobx";
+import { FilmContent } from "@/content";
 
 export interface PreludeProps {
   running: boolean;
-  setCurrentFilm: (film: LinkProps | null) => void;
+  setCurrentFilm: (film: FilmContent | null) => void;
   textRef: React.RefObject<HTMLDivElement | null>;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
 }

@@ -5,7 +5,7 @@ import { useCssVar } from "@/hooks/useCssVar";
 import { State } from "@/state/State";
 import { Rect } from "@/utils/Rect";
 import { useSize } from "@/hooks/useSize";
-import { LinkProps } from "@/state/Char";
+import { FilmContent } from "@/content";
 
 const isTouch = "ontouchstart" in window;
 
@@ -29,10 +29,10 @@ export function useUpdateState(state: State) {
     });
   }, [charWidth, lineHeight, margin, state, windowSize, canvasSize]);
 
-  const [currentFilm, _setCurrentFilm] = useState<LinkProps | null>(null);
+  const [currentFilm, _setCurrentFilm] = useState<FilmContent | null>(null);
   const isInitialTransition = useRef(currentFilm === null);
   const setCurrentFilm = useCallback(
-    (film: LinkProps | null) => {
+    (film: FilmContent | null) => {
       console.log("Setting current film to", film);
       if (film === null) {
         if (isInitialTransition.current) {

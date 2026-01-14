@@ -121,7 +121,6 @@
 
 .trackFill {
   z-index: 2; /** above track and track progress. */
-  /* background-color: var(--red); */
   border-bottom: none;
   height: 1rem;
   border-right: 1px solid currentColor;

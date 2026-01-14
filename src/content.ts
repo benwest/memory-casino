@@ -1,4 +1,22 @@
-export const content = {
+export interface FilmContent {
+  longTitle: string;
+  shortTitle: string;
+  subtitle: string;
+  link?: {
+    url: string;
+    sourceFilter: string;
+    thumbnail: string;
+  };
+}
+
+export interface Content {
+  title: string;
+  films: FilmContent[];
+  body: string[];
+  credits: string[];
+}
+
+export const content: Content = {
   title: "MEMORY CASINO",
   films: [
     {
