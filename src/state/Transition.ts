@@ -3,9 +3,9 @@ import { Keyframes } from "@/utils/tween";
 import { State } from "./State";
 import { BLACK, GREY, TRANSPARENT_WHITE, WHITE } from "./colors";
 import { SourceData } from "./sources";
-import { LinkProps } from "./Char";
 import { remapClamped } from "@/utils/math";
 import { computed } from "mobx";
+import { FilmContent } from "@/content";
 
 export interface Transition {
   update(time: number): void;
@@ -70,9 +70,8 @@ export class TransitionOut implements Transition {
   backgroundColorKeyframes = new Keyframes<Color>(GREY).to(BLACK, 1, "quadIn");
   overlayColorKeyframes = new Keyframes<Color>(WHITE).to(BLACK, 1, "quintOut");
 
-  constructor(private state: State, link?: LinkProps) {
-    console.log("transition out started");
-    this.transitionOrder = link ? state.clipsForLink(link) : [];
+  constructor(private state: State, toFilm?: FilmContent) {
+    this.transitionOrder = toFilm ? state.clipsForFilm(toFilm) : [];
   }
 
   update(time: number) {

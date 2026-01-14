@@ -1,3 +1,4 @@
+import { FilmContent } from "@/content";
 import { lerpSmooth, moveTowards } from "@/utils/math";
 import { Rect } from "@/utils/Rect";
 import { observable, action } from "mobx";
@@ -9,17 +10,11 @@ const LIGHT_FADE_OUT_DURATION = 2;
 
 export type CharType = "title" | "link" | "inactive-link" | "body" | "gap";
 
-export interface LinkProps {
-  url: string;
-  sourceFilter: string;
-  thumbnail: string;
-}
-
 export interface CharParams {
   index: number;
   value: string;
   type: CharType;
-  link?: LinkProps;
+  film?: FilmContent;
   rect?: Rect;
   transitionInDelay?: number;
 }
@@ -28,7 +23,7 @@ export class Char {
   readonly index: number;
   readonly value: string;
   readonly type: CharType;
-  readonly link?: LinkProps;
+  readonly film?: FilmContent;
   readonly rect: Rect;
   readonly transitionInDelay: number;
 
@@ -55,14 +50,14 @@ export class Char {
     index,
     value = " ",
     type = "body",
-    link,
+    film,
     rect = new Rect(0, 0, 0, 0),
     transitionInDelay: delay = 0,
   }: CharParams) {
     this.index = index;
     this.value = value;
     this.type = type;
-    this.link = link;
+    this.film = film;
     this.rect = rect;
     this.transitionInDelay = delay;
   }
