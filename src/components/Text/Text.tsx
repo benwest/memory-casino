@@ -91,17 +91,12 @@ function createLightGradient(r: number, fromColor: Color, toColor: Color) {
   canvas.width = canvas.height = lightRadius * 2;
   const gradient = ctx.createRadialGradient(r, r, 0, r, r, r);
   const numStops = 10;
-  let css = `radial-gradient(circle at center, `;
   for (let i = 0; i <= numStops; i++) {
     const t = i / numStops;
     const g = gaussian(t);
     const color = lerpColors(fromColor, toColor, g);
     gradient.addColorStop(t, toRgbaString(color));
-    css += `${toRgbaString(color)} ${Math.round(t * 100 * Math.sqrt(0.5))}%`;
-    if (i < numStops) css += ", ";
   }
-  css += ")";
-  console.log(css);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   return canvas;
