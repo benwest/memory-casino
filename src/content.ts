@@ -14,13 +14,17 @@ export const content = {
     {
       longTitle: "MEMORY CASINO  PART TWO",
       shortTitle: "PART TWO",
-      subtitle: "[TO COME]",
-      link: undefined,
+      subtitle: "PLAY [01:13]",
+      link: {
+        url: "https://player.vimeo.com/external/1154196684.m3u8?s=fc73f97690fd2707fbe89b9f717e989221a92bbc&logging=false",
+        sourceFilter: "MC2",
+        thumbnail: "MC2_00005",
+      },
     },
     {
       longTitle: "MEMORY CASINO  PART THREE",
       shortTitle: "PART THREE",
-      subtitle: "[TO COME]",
+      subtitle: "[SPRING 2026]",
       link: undefined,
     },
   ],
@@ -29,9 +33,9 @@ export const content = {
     `The MEMORY CASINO holds all human memory and not just the user's[.]Reel Envy has created a generation of addicts who desperately trip into the Membrane, hot to land on a memory of their own life[.]This is one such Silo`,
   ],
   credits: [
-    `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producer[:]DIANDRA ARRIGA[;]Cinematographer[:]EDSON REYES[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
+    `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALES ROJAS[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producer[:]DIANDRA ARRIGA[;]Cinematographer[:]EDSON REYES[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
     `VARIATION 1[:]Composed and Performed by[:]QUR'AN SHAHEED[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING`,
     `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA, CDMX[;]and[:]LA TORRE, LOS ANGELES`,
-    `Titles by[:]A. TEATRO[;]Website by[:]BEN WEST`,
+    `Architectural design by[:]A. TEATRO[;]Special Thank You To[:]THE LIFT[;]Website by[:]BEN WEST`,
   ],
 };

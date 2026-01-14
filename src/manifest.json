@@ -495,6 +495,11 @@
     "duration": 4.938
   },
   {
+    "url": "/videos/MC2_00006.webm",
+    "image": "/videos/MC2_00006.webp",
+    "duration": 6.215
+  },
+  {
     "url": "/videos/BROLL_00022.webm",
     "image": "/videos/BROLL_00022.webp",
     "duration": 10.043
@@ -538,6 +543,16 @@
     "url": "/videos/BROLL_00008.webm",
     "image": "/videos/BROLL_00008.webp",
     "duration": 5.739
+  },
+  {
+    "url": "/videos/MC2_00004.webm",
+    "image": "/videos/MC2_00004.webp",
+    "duration": 1.71
+  },
+  {
+    "url": "/videos/MC2_00005.webm",
+    "image": "/videos/MC2_00005.webp",
+    "duration": 12.555
   },
   {
     "url": "/videos/BROLL_00009.webm",
@@ -590,6 +605,16 @@
     "duration": 7.466
   },
   {
+    "url": "/videos/MC2_00001.webm",
+    "image": "/videos/MC2_00001.webp",
+    "duration": 14.265
+  },
+  {
+    "url": "/videos/MC2_00000.webm",
+    "image": "/videos/MC2_00000.webp",
+    "duration": 7.466
+  },
+  {
     "url": "/videos/BROLL_00030.webm",
     "image": "/videos/BROLL_00030.webp",
     "duration": 13.513
@@ -628,6 +653,16 @@
     "url": "/videos/BROLL_00026.webm",
     "image": "/videos/BROLL_00026.webp",
     "duration": 6.833
+  },
+  {
+    "url": "/videos/MC2_00002.webm",
+    "image": "/videos/MC2_00002.webp",
+    "duration": 6.882
+  },
+  {
+    "url": "/videos/MC2_00003.webm",
+    "image": "/videos/MC2_00003.webp",
+    "duration": 3.254
   },
   {
     "url": "/videos/BROLL_00027.webm",
