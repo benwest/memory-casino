@@ -7,8 +7,19 @@ const sourceDir = join(__dirname, "..", "sources");
 const destDir = join(__dirname, "..", "public", "videos");
 
 // Loop over all files in ./sources directory
-const sourceFiles = await fs.readdir(sourceDir);
+const sourceFiles = (await fs.readdir(sourceDir)).filter(file =>
+  [".mp4", ".mov", ".avi", ".mkv"].includes(extname(file).toLowerCase())
+);
 const manifest: SourceData[] = [];
+
+async function fileExists(path: string) {
+  try {
+    await fs.access(path, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 for (const file of sourceFiles) {
   const filename = basename(file);
@@ -20,17 +31,26 @@ for (const file of sourceFiles) {
   console.log(`Converting ${filename}...`);
 
   try {
-    execSync(
-      `ffmpeg -y -i "${inputPath}" \
-      -c:v libvpx-vp9 -crf 30 -b:v 0 -an \
-      -vf "scale=128:384:force_original_aspect_ratio=increase,crop=128:384" \
-      "${videoPath}"`,
-      { stdio: "inherit" }
-    );
+    if (!(await fileExists(videoPath))) {
+      execSync(
+        `ffmpeg -y -i "${inputPath}" \
+        -c:v libvpx-vp9 -crf 30 -b:v 0 -an \
+        -vf "scale=128:384:force_original_aspect_ratio=increase,crop=128:384" \
+        "${videoPath}"`,
+        { stdio: "inherit" }
+      );
+    } else {
+      console.log(`  Video already exists, skipping conversion.`);
+    }
 
-    execSync(`ffmpeg -y -i "${videoPath}" -vframes 1 -q:v 80 "${imagePath}"`, {
-      stdio: "inherit",
-    });
+    if (!(await fileExists(imagePath))) {
+      execSync(
+        `ffmpeg -y -i "${videoPath}" -vframes 1 -q:v 80 "${imagePath}"`,
+        { stdio: "inherit" }
+      );
+    } else {
+      console.log(`  Thumbnail already exists, skipping generation.`);
+    }
 
     const duration = parseFloat(
       execSync(
