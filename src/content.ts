@@ -51,7 +51,7 @@ export const content: Content = {
     `The MEMORY CASINO holds all human memory and not just the user's[.]Reel Envy has created a generation of addicts who desperately trip into the Membrane, hot to land on a memory of their own life[.]This is one such Silo`,
   ],
   credits: [
-    `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALES ROJAS[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producer[:]DIANDRA ARRIGA[;]Cinematographer[:]EDSON REYES[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
+    `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALEZ ROJAS[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producer[:]DIANDRA ARRIGA[;]Cinematographer[:]EDSON REYES[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
     `VARIATION 1[:]Composed and Performed by[:]QUR'AN SHAHEED[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING`,
     `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA, CDMX[;]and[:]LA TORRE, LOS ANGELES`,
     `Architectural design by[:]A. TEATRO[;]Special Thank You To[:]THE LIFT[;]Website by[:]BEN WEST`,
