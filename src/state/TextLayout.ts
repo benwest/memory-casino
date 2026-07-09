@@ -268,7 +268,7 @@ export class TextLayout {
       this.ctx.film = film;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(
-        this.spaceBetween(film.longTitle, film.subtitle, this.columnWidthChars)
+        this.spaceBetween(film.longTitle, film.subtitle, this.columnWidthChars),
       );
       this.restore();
     };
@@ -295,8 +295,10 @@ export class TextLayout {
         this.ctx.duration = DURATIONS.slow;
         this.push(
           " ".repeat(
-            this.columnWidthChars + this.gutterWidthChars - content.title.length
-          )
+            this.columnWidthChars +
+              this.gutterWidthChars -
+              content.title.length,
+          ),
         );
       } else {
         this.ctx.duration = DURATIONS.slow;
@@ -310,7 +312,11 @@ export class TextLayout {
       this.ctx.film = film;
       this.ctx.type = film.link ? "link" : "inactive-link";
       this.push(
-        this.spaceBetween(film.shortTitle, film.subtitle, this.columnWidthChars)
+        this.spaceBetween(
+          film.shortTitle,
+          film.subtitle,
+          this.columnWidthChars,
+        ),
       );
       this.restore();
 
