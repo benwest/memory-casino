@@ -144,18 +144,19 @@ export class State {
   }
 
   skipForward() {
-    let toTime: number;
+    const elapsed = this.time - this.transitionStartTime;
+    let toElapsed: number;
     const loop0 = this.clipTimeline.getLoopStartTime(0);
     const loop1 = this.clipTimeline.getLoopStartTime(1);
-    if (this.time < loop0) {
-      toTime = loop0;
-    } else if (this.time < loop1) {
-      toTime = loop1;
+    if (elapsed < loop0) {
+      toElapsed = loop0;
+    } else if (elapsed < loop1) {
+      toElapsed = loop1;
     } else {
       return;
     }
-    if (toTime > this.time) {
-      this.update(toTime - this.time);
+    if (toElapsed > elapsed) {
+      this.update(toElapsed - elapsed);
     }
   }
 

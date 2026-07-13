@@ -30,17 +30,10 @@ export function useUpdateState(state: State) {
   }, [charWidth, lineHeight, margin, state, windowSize, canvasSize]);
 
   const [currentFilm, _setCurrentFilm] = useState<FilmContent | null>(null);
-  const isInitialTransition = useRef(currentFilm === null);
   const setCurrentFilm = useCallback(
     (film: FilmContent | null) => {
-      console.log("Setting current film to", film);
       if (film === null) {
-        if (isInitialTransition.current) {
-          isInitialTransition.current = false;
-          state.transitionIn();
-        } else {
-          state.transitionInFast();
-        }
+        state.transitionInFast();
       } else {
         state.transitionOut(isTouch ? undefined : film);
       }
