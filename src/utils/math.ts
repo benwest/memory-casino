@@ -3,7 +3,7 @@ export function remap(
   start1: number,
   stop1: number,
   start2: number,
-  stop2: number
+  stop2: number,
 ): number {
   return ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 }
@@ -13,7 +13,7 @@ export function remapClamped(
   start1: number,
   stop1: number,
   start2: number,
-  stop2: number
+  stop2: number,
 ): number {
   const t = clamp((value - start1) / (stop1 - start1), 0, 1);
   return start2 + t * (stop2 - start2);
@@ -52,4 +52,9 @@ export function lerpSmooth(a: number, b: number, delta: number, h: number) {
 export function wrap(value: number, min: number, max: number) {
   const range = max - min;
   return ((((value - min) % range) + range) % range) + min;
+}
+
+export function moveToward(value: number, target: number, maxDelta: number) {
+  if (Math.abs(target - value) <= maxDelta) return target;
+  return value + Math.sign(target - value) * maxDelta;
 }

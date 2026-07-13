@@ -42,8 +42,12 @@ export const content: Content = {
     {
       longTitle: "MEMORY CASINO  PART THREE",
       shortTitle: "PART THREE",
-      subtitle: "[SPRING 2026]",
-      link: undefined,
+      subtitle: "PLAY [10:34]",
+      link: {
+        url: "https://player.vimeo.com/external/1208177500.m3u8?s=d172fd9c601e181226627b98c58abb785f6a1293&logging=false",
+        sourceFilter: "MC3",
+        thumbnail: "MC3_00061",
+      },
     },
   ],
   body: [
@@ -51,9 +55,8 @@ export const content: Content = {
     `The MEMORY CASINO holds all human memory and not just the user's[.]Reel Envy has created a generation of addicts who desperately trip into the Membrane, hot to land on a memory of their own life[.]This is one such Silo`,
   ],
   credits: [
-    `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALEZ ROJAS[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producer[:]DIANDRA ARRIGA[;]Cinematographer[:]EDSON REYES[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
-    `VARIATION 1[:]Composed and Performed by[:]QUR'AN SHAHEED[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING`,
-    `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA, CDMX[;]and[:]LA TORRE, LOS ANGELES`,
-    `Architectural design by[:]A. TEATRO[;]Special Thank You To[:]THE LIFT[;]Website by[:]BEN WEST`,
+    `A film from[:]ONCE DE JULIO[;]Written, Directed & Edited by[:]A.G. ROJAS[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALEZ ROJAS[;]With A Special Artistic Participation by[:]CONLLOGA MUIXERANGA DE CASTELLÓ in Valencia[;]and[;]LA ESCUELA DEL BALLET FOLKLÓRICO DE MÉXICO DE AMALIA HERNÁNDEZ[;]Executive Producer[:]GRACE CAMPOS[;]Producers[:]DIANDRA ARRIGA, GRACE CAMPOS and LUIS CERVERA GIL[;]Cinematographers[:]EDSON REYES and DANI FERNÁNDEZ ABELLÓ[;]1st ACs[:]REBECCA BECERRA-CUSI and JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS[;]Grip[:]YVES ROLAND`,
+    `Music for Part I composed by[:]QUR'AN SHAHEED[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING[;]Music for Part III by[:]JAMES WILLIAM BLADES`,
+    `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA[;]and[:]LA TORRE, LOS ANGELES[;]Film Production Serviced by[:]THE PRODUCTION CLUB (Spain)[;]and[;]THE LIFT (Mexico)[;]Architectural design by[:]A. TEATRO[;]Special thank you to[:]FUAD ABED and JORGE LLAMA[;]Website by[:]BEN WEST`,
   ],
 };
