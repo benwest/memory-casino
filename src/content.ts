@@ -55,11 +55,8 @@ export const content: Content = {
     `The MEMORY CASINO holds all human memory and not just the user's[.]Reel Envy has created a generation of addicts who desperately trip into the Membrane, hot to land on a memory of their own life[.]This is one such Silo`,
   ],
   credits: [
-    `A film from[:]ONCE DE JULIO[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALEZ ROJAS[;]Written, Directed & Performed by[:]A.G. ROJAS[;]Executive Producer[:]GRACE CAMPOS[;]Producers[:]DIANDRA ARRIGA, GRACE CAMPOS[;]Cinematographers[:]EDSON REYES, DANI FERNÁNDEZ ABELLÓ[;]1st AC[:]JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS`,
-    `Music composed by[:] QUR'AN SHAHEED, JAMES WILLIAM BLADES[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING`,
-    `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA, CDMX[;]and[:]LA TORRE, LOS ANGELES`,
-    `Special Artistic Participation by[:]CONLLOGA MUIXERANGA DE CASTELLÓ in Valencia[;]and[;]LA ESCUELA DEL BALLET FOLKLÓRICO DE MÉXICO DE AMALIA HERNÁNDEZ`,
-    `Film Production Serviced by[:]The Production Club (Spain)[;]and[;]The Lift (Mexico)`,
-    `Architectural design by[:]A. TEATRO[;]Special Thank You To[:]THE LIFT[;]Website by[:]BEN WEST`,
+    `A film from[:]ONCE DE JULIO[;]Written, Directed & Edited by[:]A.G. ROJAS[;]Starring[:]JULIAN HUCKLEBY, AG ROJAS and D. GONZALEZ ROJAS[;]With A Special Artistic Participation by[:]CONLLOGA MUIXERANGA DE CASTELLÓ in Valencia[;]and[;]LA ESCUELA DEL BALLET FOLKLÓRICO DE MÉXICO DE AMALIA HERNÁNDEZ[;]Executive Producer[:]GRACE CAMPOS[;]Producers[:]DIANDRA ARRIGA, GRACE CAMPOS and LUIS CERVERA GIL[;]Cinematographers[:]EDSON REYES and DANI FERNÁNDEZ ABELLÓ[;]1st ACs[:]REBECCA BECERRA-CUSI and JOSUÉ DURAN[;]2nd AC[:]NICOLAS GUTIÉRREZ[;]Loader[:]CARLOS GRIS[;]Grip[:]YVES ROLAND`,
+    `Music for Part I composed by[:]QUR'AN SHAHEED[;]Harpist[:]MAIA HARPER[;]Mixing, Tape Loop, and Production[:]SPENCER HARTLING[;]Music for Part III by[:]JAMES WILLIAM BLADES`,
+    `Filmed on Location[:]RESTAURANTE PACHUCA, SANTA MARIA LA RIBERA[;]and[:]LA TORRE, LOS ANGELES[;]Film Production Serviced by[:]THE PRODUCTION CLUB (Spain)[;]and[;]THE LIFT (Mexico)[;]Architectural design by[:]A. TEATRO[;]Special thank you to[:]FUAD ABED and JORGE LLAMA[;]Website by[:]BEN WEST`,
   ],
 };
